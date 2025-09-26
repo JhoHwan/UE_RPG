@@ -16,5 +16,5 @@ class RPG_API URPGBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Utility")
-	static FText ConvertTextToEmailForm(const FText& InText);
+	static FText ConvertTextToEmailForm(const FText& InText, int32 maxLength);
 };
