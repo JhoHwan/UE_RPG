@@ -19,7 +19,7 @@
 - [ ] 캐릭터 선택 창 초안 완성
 
 ---
-## [[GameDesign]]
+## [게임 기획](Docs/GameDesign/GameDesign.md)
 
 ---
 ## 개발일지
