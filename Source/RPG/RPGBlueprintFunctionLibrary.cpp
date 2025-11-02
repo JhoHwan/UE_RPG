@@ -2,26 +2,27 @@
 
 
 #include "RPGBlueprintFunctionLibrary.h"
+#include "Engine/World.h"
+#include "Components/Widget.h"
 
-FText URPGBlueprintFunctionLibrary::ConvertTextToEmailForm(const FText& InText, int32 maxLength)
+void URPGBlueprintFunctionLibrary::SetFocusToWidget(UWorld* World, UWidget* Widget)
 {
-    FString Input = InText.ToString();
-    FString Filtered;
+	if (World)
+	{
+		FTimerHandle Tmp;
+		World->GetTimerManager().SetTimer(
+			Tmp,
+			FTimerDelegate::CreateWeakLambda(Widget, [Widget]()
+				{
+					Widget->SetKeyboardFocus();
+				}),
+			0.2f, false);
+	}
+}
 
-    int32 length = 0;
-
-    for (TCHAR Char : Input)
-    {
-        if ((Char >= 'A' && Char <= 'Z') ||
-            (Char >= 'a' && Char <= 'z') ||
-            (Char >= '0' && Char <= '9') ||
-            (Char == '@') || (Char == '.'))
-        {
-            ++length;
-            Filtered.AppendChar(Char);
-        }
-        if (length >= maxLength) break;
-    }
-
-    return FText::FromString(Filtered);
+bool URPGBlueprintFunctionLibrary::IsValidEmailFormat(const FString& Email)
+{
+	static const FRegexPattern Pattern(TEXT("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"));
+	FRegexMatcher Matcher(Pattern, Email);
+	return Matcher.FindNext();
 }

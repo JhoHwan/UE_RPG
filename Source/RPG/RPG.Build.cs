@@ -11,5 +11,7 @@ public class RPG : ModuleRules
 		PublicIncludePaths.AddRange(new string[] { "RPG" });
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "GameplayTags", "GameplayTasks" });
+
+		PrivateDependencyModuleNames.AddRange(new string[] { "HTTP", "Json", "Slate", "SlateCore" });
 	}
 }

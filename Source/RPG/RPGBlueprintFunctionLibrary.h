@@ -15,6 +15,9 @@ class RPG_API URPGBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Utility")
-	static FText ConvertTextToEmailForm(const FText& InText, int32 maxLength);
+	UFUNCTION(BlueprintCallable)
+	static void SetFocusToWidget(class UWorld* World, class UWidget* Widget);
+
+	UFUNCTION(BlueprintCallable)
+	static bool IsValidEmailFormat(const FString& Email);
 };
