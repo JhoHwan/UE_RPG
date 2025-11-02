@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/TextBlock.h"
-#include "RPGErrorLabel.generated.h"
+#include "RPGLoginLabel.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RPG_API URPGErrorLabel : public UTextBlock
+class RPG_API URPGLoginLabel : public UTextBlock
 {
 	GENERATED_BODY()
 	

@@ -1,18 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SubSystem/RPGAuthSubSystem.h"
-#include "RPGHttpSubSystem.h"
+#include "RPGTitleGameMode.h"
+#include "SubSystem/RPGHttpSubSystem.h"
 
-void URPGAuthSubSystem::TryLogin(const FString& Email, const FString& Password, FOnLoginResponse Callback)
+void ARPGTitleGameMode::TryLogin(const FString& Email, const FString& Password, FOnLoginResponse Callback)
 {
 	OnLoginResponseCallback = Callback;
 
 	SendAuthRequest(LoginUrl, Email, Password,
-		FOnHttpRequestComplete::CreateUObject(this, &URPGAuthSubSystem::OnLoginResponse));
+		FOnHttpRequestComplete::CreateUObject(this, &ARPGTitleGameMode::OnLoginResponse));
 }
 
-void URPGAuthSubSystem::OnLoginResponse(const FAPIResponse& Response)
+void ARPGTitleGameMode::OnLoginResponse(const FAPIResponse& Response)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s"), *Response.Message);
 
@@ -29,15 +29,15 @@ void URPGAuthSubSystem::OnLoginResponse(const FAPIResponse& Response)
 	OnLoginResponseCallback.Unbind();
 }
 
-void URPGAuthSubSystem::TryRegister(const FString& Email, const FString& Password, FOnRegisterResponse Callback)
+void ARPGTitleGameMode::TryRegister(const FString& Email, const FString& Password, FOnRegisterResponse Callback)
 {
 	OnRegisterResponseCallback = Callback;
 
 	SendAuthRequest(RegisterUrl, Email, Password,
-		FOnHttpRequestComplete::CreateUObject(this, &URPGAuthSubSystem::OnRegisterResponse));
+		FOnHttpRequestComplete::CreateUObject(this, &ARPGTitleGameMode::OnRegisterResponse));
 }
 
-void URPGAuthSubSystem::OnRegisterResponse(const FAPIResponse& Response)
+void ARPGTitleGameMode::OnRegisterResponse(const FAPIResponse& Response)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s"), *Response.Message);
 
@@ -45,7 +45,7 @@ void URPGAuthSubSystem::OnRegisterResponse(const FAPIResponse& Response)
 	OnRegisterResponseCallback.Unbind();
 }
 
-void URPGAuthSubSystem::SendAuthRequest(const FString& Url, const FString& Email, const FString& Password, FOnHttpRequestComplete Callback)
+void ARPGTitleGameMode::SendAuthRequest(const FString& Url, const FString& Email, const FString& Password, FOnHttpRequestComplete Callback)
 {
 	URPGHttpSubSystem* HttpSubSystem = GetGameInstance()->GetSubsystem<URPGHttpSubSystem>();
 	if (!HttpSubSystem)

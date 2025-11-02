@@ -3,11 +3,10 @@
 
 #include "RPGHttpSubSystem.h"
 #include "Http.h"
-#include "SubSystem\RPGAuthSubSystem.h"
 
 void URPGHttpSubSystem::SendRequest
 	(const FString& InUrl, const FString& Inverb, 
-	const FString& Content, FOnHttpRequestComplete Callback, bool bUseAuth)
+	const FString& Content, FOnHttpRequestComplete Callback, bool bUseAuth, const FAuthInfo* AuthInfo)
 {
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
@@ -20,15 +19,13 @@ void URPGHttpSubSystem::SendRequest
 
 	if (bUseAuth)
 	{
-		URPGAuthSubSystem* AuthSubSystem = GetGameInstance()->GetSubsystem<URPGAuthSubSystem>();
-		const FAuthInfo& AuthInfo = AuthSubSystem->GetAuthInfo(); 
-		if (!AuthInfo.bLogin)
+		if (!AuthInfo->bLogin)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("User is not logged in"));
 		}
 		else
 		{
-			FString AuthHeader = FString::Printf(TEXT("Bearer %s"), *AuthInfo.Token);
+			FString AuthHeader = FString::Printf(TEXT("Bearer %s"), *AuthInfo->Token);
 			Request->SetHeader(TEXT("Authorization"), AuthHeader);
 		}
 	}

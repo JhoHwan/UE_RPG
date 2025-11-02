@@ -39,7 +39,7 @@ protected:
 	TObjectPtr<class UEditableTextBox> PasswordBox;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	TObjectPtr<class URPGErrorLabel> ErrorLabel;
+	TObjectPtr<class URPGLoginLabel> ErrorLabel;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UCheckBox> SaveEmailCheckBox;

@@ -13,3 +13,9 @@ struct FAPIResponse
 	FString Message;
 	TSharedPtr<FJsonObject> Data;
 };
+
+struct FAuthInfo
+{
+	FString Token;
+	bool bLogin{ false };
+};

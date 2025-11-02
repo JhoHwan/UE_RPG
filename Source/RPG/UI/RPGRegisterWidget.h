@@ -44,7 +44,7 @@ protected:
 	TObjectPtr<class UEditableTextBox> PasswordConfirmBox;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class URPGErrorLabel> ErrorLabel;
+	TObjectPtr<class URPGLoginLabel> ErrorLabel;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> RegisterBtn;

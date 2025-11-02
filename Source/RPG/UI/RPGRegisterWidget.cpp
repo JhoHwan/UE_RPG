@@ -4,9 +4,9 @@
 #include "UI/RPGRegisterWidget.h"
 #include "Components/EditableTextBox.h"
 #include "Components/Button.h"
-#include "RPGErrorLabel.h"
+#include "RPGLoginLabel.h"
 #include "RPGBlueprintFunctionLibrary.h"
-#include "SubSystem/RPGAuthSubSystem.h"
+#include "GameMode\RPGTitleGameMode.h"
 
 #define SetFocus(Widget) URPGBlueprintFunctionLibrary::SetFocusToWidget(GetWorld(), Widget)
 
@@ -75,12 +75,11 @@ void URPGRegisterWidget::TryRegister()
 		return;
 	}
 
-	URPGAuthSubSystem* AuthSubSystem = GetGameInstance()->GetSubsystem<URPGAuthSubSystem>();
-	check(AuthSubSystem);
+	ARPGTitleGameMode* TitleGameMode = CastChecked<ARPGTitleGameMode>(GetWorld()->GetAuthGameMode());
 
 	Blocker->SetVisibility(ESlateVisibility::Visible);
 
-	AuthSubSystem->TryRegister(Email, Password, FOnRegisterResponse::CreateUObject(this, &URPGRegisterWidget::OnRegisterResponse));
+	TitleGameMode->TryRegister(Email, Password, FOnRegisterResponse::CreateUObject(this, &URPGRegisterWidget::OnRegisterResponse));
 }
 
 void URPGRegisterWidget::OnRegisterResponse(bool bSuccess, const FString& Message)

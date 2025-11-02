@@ -6,12 +6,12 @@
 #include "Components/EditableTextBox.h"
 #include "Components/CheckBox.h"
 #include "Components/Button.h"
-#include "SubSystem/RPGAuthSubSystem.h"
+#include "GameMode\RPGTitleGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "SaveGame/RPGLoginSaveGame.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "RPGBlueprintFunctionLibrary.h"
-#include "RPGErrorLabel.h"
+#include "RPGLoginLabel.h"
 
 #define SetFocus(Widget) URPGBlueprintFunctionLibrary::SetFocusToWidget(GetWorld(), Widget)
 
@@ -94,13 +94,11 @@ void URPGLoginWidget::TryLogin()
 		return;
 	}
 
-	URPGAuthSubSystem* AuthSubSystem = GetGameInstance()->GetSubsystem<URPGAuthSubSystem>();
-
-	checkf(AuthSubSystem, TEXT("AuthSubSystem is required."));
+	ARPGTitleGameMode* TitleGameMode = CastChecked<ARPGTitleGameMode>(GetWorld()->GetAuthGameMode());
 
 	Blocker->SetVisibility(ESlateVisibility::Visible);
 
-	AuthSubSystem->TryLogin(Email, Password, FOnLoginResponse::CreateUObject(this, &URPGLoginWidget::OnLoginResponse));
+	TitleGameMode->TryLogin(Email, Password, FOnLoginResponse::CreateUObject(this, &URPGLoginWidget::OnLoginResponse));
 }
 
 void URPGLoginWidget::OnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)

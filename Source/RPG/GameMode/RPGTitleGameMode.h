@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Subsystems/GameInstanceSubsystem.h"
-#include "RPGHttpTypes.h"
-#include "RPGAuthSubSystem.generated.h"
+#include "GameFramework/GameModeBase.h"
+#include "Subsystem/RPGHttpTypes.h"
+#include "RPGTitleGameMode.generated.h"
 
 /**
  * 
@@ -13,14 +13,9 @@
 
 DECLARE_DELEGATE_TwoParams(FOnLoginResponse, bool /*bSuccess*/, const FString& /*Message*/);
 DECLARE_DELEGATE_TwoParams(FOnRegisterResponse, bool /*bSuccess*/, const FString& /*Message*/);
-struct FAuthInfo
-{
-	FString Token;
-	bool bLogin{ false };
-};
 
 UCLASS()
-class RPG_API URPGAuthSubSystem : public UGameInstanceSubsystem
+class RPG_API ARPGTitleGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 

@@ -17,7 +17,7 @@ class RPG_API URPGHttpSubSystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 public:
-	void SendRequest(const FString& Url, const FString& Inverb, const FString& Content, FOnHttpRequestComplete Callback, bool bUseAuth = false);
+	void SendRequest(const FString& Url, const FString& Inverb, const FString& Content, FOnHttpRequestComplete Callback, bool bUseAuth = false, const FAuthInfo* AuthInfo = nullptr);
 
 private:
 	const FString DefaultUrl{ TEXT("https://localhost:7013") };

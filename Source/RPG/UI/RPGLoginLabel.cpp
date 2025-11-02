@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "RPGErrorLabel.h"
+#include "RPGLoginLabel.h"
 
-void URPGErrorLabel::BeginDestroy()
+void URPGLoginLabel::BeginDestroy()
 {
 	if (UWorld* World = GetWorld())
 	{
@@ -13,7 +13,7 @@ void URPGErrorLabel::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void URPGErrorLabel::SetErrorLabel(const FString& Message, bool bSetTimer, float Time)
+void URPGLoginLabel::SetErrorLabel(const FString& Message, bool bSetTimer, float Time)
 {
 	SetVisibility(ESlateVisibility::Visible);
 	SetText(FText::FromString(Message));
@@ -21,7 +21,7 @@ void URPGErrorLabel::SetErrorLabel(const FString& Message, bool bSetTimer, float
 	if (bSetTimer) SetInvisibleTimer(Time);
 }
 
-void URPGErrorLabel::SetInvisibleTimer(float Time)
+void URPGLoginLabel::SetInvisibleTimer(float Time)
 {
 	if (Time < 0.0f) return;
 
