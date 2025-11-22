@@ -12,6 +12,11 @@
 				"UMG",
 				"Engine"
 			]
+		},
+		{
+			"name": "MP2Editor",
+			"type": "Editor",
+			"loadingPhase": "PostEngineInit"
 		}
 	],
 	"Plugins": [
@@ -29,6 +34,11 @@
 		{
 			"Name": "ActorPalette",
 			"Enabled": true
+		},
+		{
+			"Name": "ModuleGenerator",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/ec36ec6e94f74075819e2a04f7cb97f3"
 		}
 	]
 }
