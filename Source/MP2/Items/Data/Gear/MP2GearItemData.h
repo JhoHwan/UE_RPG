@@ -11,37 +11,55 @@
  * 
  */
 
+UENUM(BlueprintType)
+enum class EAppearanceMeshType : uint8
+{
+	None		UMETA(DisplayName = "None"),
+	Skeletal	UMETA(DisplayName = "Skeletal"),
+	Static		UMETA(DisplayName = "Static"),
+};
+
 UCLASS()
 class MP2_API UMP2GearItemData : public UMP2ItemData
 {
 	GENERATED_BODY()
 
-protected:
-	// 내부 제어용 플래그 (에디터 표시/숨김에 사용)
-	UPROPERTY(VisibleAnywhere, Category = "Visual", meta = (AllowPrivateAccess = "true"))
-	bool bUseSkeletalMesh = false;
-
-	UPROPERTY(VisibleAnywhere, Category = "Visual", meta = (AllowPrivateAccess = "true"))
-	bool bUseStaticMesh = false;
-
 public:
 	UMP2GearItemData();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear")
-	EGearSlotType GearSlotType = EGearSlotType::None;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear", meta = (EditCondition = ""))
-	bool bIsOutFitOnly = false;
-	
-	UPROPERTY(EditAnywhere, Category = "Visual", meta = (EditCondition = "bUseSkeletalMesh", EditConditionHides))
-	TObjectPtr<USkeletalMesh> SkeletalMesh = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "Visual", meta = (EditCondition = "bUseStaticMesh", EditConditionHides))
-	TObjectPtr<UStaticMesh> StaticMesh = nullptr;
+	static EAppearanceMeshType GetMeshType(EGearSlot GearSlot);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
+
+	GENERATE_GETTER(EHairVisibilityMode, HairVisibilityMode)
+	GENERATE_GETTER(EEarRingVisibilityMode, EarRingVisibilityMode)
+
+protected:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Visual|Mesh")
+	EAppearanceMeshType MeshType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual|Cap", meta = (EditCondition = "GearSlot == EGearSlot::Cap", EditConditionHides))
+	EHairVisibilityMode HairVisibilityMode = EHairVisibilityMode::Override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual|Cap", meta = (EditCondition = "GearSlot == EGearSlot::Cap", EditConditionHides))
+	EEarRingVisibilityMode EarRingVisibilityMode = EEarRingVisibilityMode::Override;
+
+public:
+	FORCEINLINE EAppearanceMeshType GetMeshType() { return MeshType; }
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear")
+	EGearSlot GearSlot = EGearSlot::None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gear", meta = (EditCondition = ""))
+	bool bIsOutFitOnly = false;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Visual|Mesh", meta = (EditCondition = "MeshType == EAppearanceMeshType::Skeletal", EditConditionHides))
+	TObjectPtr<USkeletalMesh> SkeletalMesh = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Visua|Mesh", meta = (EditCondition = "MeshType == EAppearanceMeshType::Static", EditConditionHides))
+	TObjectPtr<UStaticMesh> StaticMesh = nullptr;
 
 private:
 	void UpdateMeshUsageFlags();

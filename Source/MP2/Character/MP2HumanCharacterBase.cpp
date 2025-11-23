@@ -2,7 +2,7 @@
 
 
 #include "Character/MP2HumanCharacterBase.h"
-#include "MP2CharacterAppearanceComponent.h"
+#include "ActorComponents\MP2CharacterAppearanceComponent.h"
 #include "Items\Data\Gear\MP2GearItemData.h"
 
 // Sets default values
@@ -37,29 +37,21 @@ AMP2HumanCharacterBase::AMP2HumanCharacterBase() : Super()
 
 	ClothMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CL"));
 	ClothMesh->SetupAttachment(DefaultMesh);
-	ClothMesh->SetMasterPoseComponent(DefaultMesh);
+	ClothMesh->SetLeaderPoseComponent(DefaultMesh);
 		
 	PantsMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PA"));
 	PantsMesh->SetupAttachment(DefaultMesh);
-	PantsMesh->SetMasterPoseComponent(DefaultMesh);
+	PantsMesh->SetLeaderPoseComponent(DefaultMesh);
 
 	GlovesMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GA"));
 	GlovesMesh->SetupAttachment(DefaultMesh);
-	GlovesMesh->SetMasterPoseComponent(DefaultMesh);
+	GlovesMesh->SetLeaderPoseComponent(DefaultMesh);
 
 	ShoesMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SH"));
 	ShoesMesh->SetupAttachment(DefaultMesh);
-	ShoesMesh->SetMasterPoseComponent(DefaultMesh);
+	ShoesMesh->SetLeaderPoseComponent(DefaultMesh);
 
 	AppearanceComponent = CreateDefaultSubobject<UMP2CharacterAppearanceComponent>(TEXT("AppearanceComponent"));
-}
-
-void AMP2HumanCharacterBase::EquipmentGear(UMP2GearItemData* GearItemData)
-{
-	if (OnGearChanged.IsBound())
-	{
-		OnGearChanged.Broadcast(GearItemData);
-	}
 }
 
 void AMP2HumanCharacterBase::PostInitializeComponents()

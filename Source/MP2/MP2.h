@@ -5,18 +5,10 @@
 #include "CoreMinimal.h"
 
 UENUM(BlueprintType)
-enum class EGearSlotType : uint8
+enum class EGenderType : uint8
 {
-	None		UMETA(DisplayName = "None"),
-	Cap			UMETA(DisplayName = "Cap"),
-	Cloth		UMETA(DisplayName = "Cloth"),
-	Gloves		UMETA(DisplayName = "Gloves"),
-	Pants		UMETA(DisplayName = "Pants"),
-	Shoes		UMETA(DisplayName = "Shoes"),
-	EarRing		UMETA(DisplayName = "EarRing"),
-	Belt		UMETA(DisplayName = "Belt"),
-	Pendant		UMETA(DisplayName = "Pendant"),
-	Cape		UMETA(DisplayName = "Cape"),
+	Male		UMETA(DisplayName = "Male"),
+	Female		UMETA(DisplayName = "Female"),
 };
 
 UENUM(BlueprintType)
@@ -35,4 +27,35 @@ enum class ERarity : uint8
 	Rare			UMETA(DisplayName = "Rare"),
 	Elite			UMETA(DisplayName = "Elite"),
 	Excellent		UMETA(DisplayName = "Excellent"),
+};
+
+UENUM(BlueprintType)
+enum class EGearSlot : uint8
+{
+	None		UMETA(DisplayName = "None"),
+	Cap			UMETA(DisplayName = "Cap"),
+	Cloth		UMETA(DisplayName = "Cloth"),
+	Gloves		UMETA(DisplayName = "Gloves"),
+	Pants		UMETA(DisplayName = "Pants"),
+	Shoes		UMETA(DisplayName = "Shoes"),
+	EarRing		UMETA(DisplayName = "EarRing"),
+	Belt		UMETA(DisplayName = "Belt"),
+	Pendant		UMETA(DisplayName = "Pendant"),
+	Cape		UMETA(DisplayName = "Cape"),
+};
+
+UENUM(BlueprintType)
+enum class EHairVisibilityMode : uint8
+{
+	Default		UMETA(DisplayName = "Default"),
+	Override	UMETA(DisplayName = "Override"),
+	Hide		UMETA(DisplayName = "Hide"),
+};
+
+UENUM(BlueprintType)
+enum class EEarRingVisibilityMode : uint8
+{
+	Default		UMETA(DisplayName = "Default"),
+	Override	UMETA(DisplayName = "Override"),
+	Hide		UMETA(DisplayName = "Hide"),
 };

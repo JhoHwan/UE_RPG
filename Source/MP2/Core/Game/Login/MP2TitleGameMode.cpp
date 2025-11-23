@@ -18,10 +18,10 @@ void AMP2TitleGameMode::OnLoginResponse(const FAPIResponse& Response)
 
 	if (!Response.Error)
 	{
-		if (Response.Data.IsValid() && Response.Data->HasField("token"))
+		if (Response.Data.IsValid() && Response.Data->HasField(TEXT("token")))
 		{ 
 			AuthInformation.bLogin = true;
-			AuthInformation.Token = Response.Data->GetStringField("token");
+			AuthInformation.Token = Response.Data->GetStringField(TEXT("token"));
 		}
 	}
 

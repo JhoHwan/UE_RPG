@@ -9,6 +9,37 @@ UMP2GearItemData::UMP2GearItemData()
 	bStackable = false;
 }
 
+EAppearanceMeshType UMP2GearItemData::GetMeshType(EGearSlot GearSlot)
+{
+    EAppearanceMeshType MeshType;
+    switch (GearSlot)
+    {
+        // Skeletal Mesh를 사용하는 슬롯들
+    case EGearSlot::Cloth:
+    case EGearSlot::Gloves:
+    case EGearSlot::Pants:
+    case EGearSlot::Shoes:
+    case EGearSlot::Cape:
+        MeshType = EAppearanceMeshType::Skeletal;
+        break;
+
+        // Static Mesh를 사용하는 슬롯들
+    case EGearSlot::Cap:
+    case EGearSlot::EarRing:
+        MeshType = EAppearanceMeshType::Static;
+        break;
+
+        // 메시가 없는 슬롯들 (Pendant, Belt 등)
+    case EGearSlot::Pendant:
+    case EGearSlot::Belt:
+    case EGearSlot::None:
+    default:
+        MeshType = EAppearanceMeshType::None;
+        break;
+    }
+    return MeshType;
+}
+
 #if WITH_EDITOR
 void UMP2GearItemData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -19,7 +50,7 @@ void UMP2GearItemData::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
         : NAME_None;
 
     // Slot 값이 바뀔 때마다 플래그 갱신
-    if (PropertyName == GET_MEMBER_NAME_CHECKED(UMP2GearItemData, GearSlotType))
+    if (PropertyName == GET_MEMBER_NAME_CHECKED(UMP2GearItemData, GearSlot))
     {
         UpdateMeshUsageFlags();
     }
@@ -29,40 +60,13 @@ void UMP2GearItemData::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 
 void UMP2GearItemData::UpdateMeshUsageFlags()
 {
-    // 기본값 초기화
-    bUseSkeletalMesh = false;
-    bUseStaticMesh = false;
+    MeshType = UMP2GearItemData::GetMeshType(GearSlot);
 
-    switch (GearSlotType)
-    {
-        // Skeletal Mesh를 사용하는 슬롯들
-    case EGearSlotType::Cloth:
-    case EGearSlotType::Gloves:
-    case EGearSlotType::Pants:
-    case EGearSlotType::Shoes:
-    case EGearSlotType::Cape:
-        bUseSkeletalMesh = true;
-        break;
-
-        // Static Mesh를 사용하는 슬롯들
-    case EGearSlotType::Cap:
-    case EGearSlotType::EarRing:
-        bUseStaticMesh = true;
-        break;
-
-        // 메시가 없는 슬롯들 (Pendant, Belt 등)
-    case EGearSlotType::Pendant:
-    case EGearSlotType::Belt:
-    case EGearSlotType::None:
-    default:
-        break;
-    }
-
-    if (!bUseSkeletalMesh)
+    if (MeshType != EAppearanceMeshType::Skeletal)
     {
         SkeletalMesh = nullptr;
     }
-    if (!bUseStaticMesh)
+    if (MeshType != EAppearanceMeshType::Static)
     {
         StaticMesh = nullptr;
     }

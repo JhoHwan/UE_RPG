@@ -4,13 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MP2.h"
 #include "MP2HumanCharacterBase.generated.h"
 
 class UStaticMeshComponent;
 class USkeletalMeshComponent;
 class UMP2GearItemData;
-
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnGearChanged, UMP2GearItemData*)
 
 UENUM(BlueprintType)
 enum class ECharacterPartType : uint8
@@ -38,16 +37,12 @@ public:
 	AMP2HumanCharacterBase();
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void EquipmentGear(UMP2GearItemData* GearItemData);
+	FORCEINLINE EGenderType GetGender() const { return Gender; }
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
-
-public:
-	FOnGearChanged OnGearChanged;
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Part")
@@ -77,4 +72,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly) 
 	TObjectPtr<class UMP2CharacterAppearanceComponent> AppearanceComponent;
 
+	UPROPERTY(BlueprintReadOnly)
+	EGenderType Gender = EGenderType::Male;
 };

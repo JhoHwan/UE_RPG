@@ -9,6 +9,8 @@
 
 class AMP2HumanCharacterBase;
 class UMP2GearItemData;
+class UMP2AppearanceItemData;
+class UMP2HairAppearanceItemData;
 
 USTRUCT(BlueprintType)
 struct FMP2CharacterPartComponents
@@ -51,15 +53,51 @@ public:
 
 	void InitializeParts(const FMP2CharacterPartComponents& InCharacterPartComponents);
 	
+	UFUNCTION(BlueprintCallable)
+	void ChangeGearAppearance(EGearSlot GearSlot, UMP2GearItemData* GearItemData);
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeAppearance(UMP2AppearanceItemData* AppearanceItemData);
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeHairColor(FLinearColor NewColor);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	virtual void ChangeAppearance(UMP2GearItemData* GearItemData);
+
 
 private:
+	void ClearGearAppearance(EGearSlot GearSlot);
+	void ChangeHairVisibilityMode(EHairVisibilityMode NewHairVisibilityMode);
+	void ChangeHairMesh(UMP2HairAppearanceItemData* AppearanceItemData);
+	
+	void ApplyHairMesh();
+	void ApplyHairColor();
+
+private:
+	UPROPERTY()
 	AMP2HumanCharacterBase* Character;
+
+	UPROPERTY()
 	FMP2CharacterPartComponents CharacterPartComponents;
 
-	TMap<EGearSlotType, UMeshComponent*> SlotToMeshMap;
+	UPROPERTY()
+	TMap<EGearSlot, UMeshComponent*> GearSlotToMeshComponentMap;
+
+	UPROPERTY()
+	UStaticMeshComponent* HairMeshComponent;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* HairMID;
+
+	UPROPERTY()
+	TMap<EHairVisibilityMode, UStaticMesh*> HairMeshMap;
+
+	FLinearColor HairColor = FLinearColor::Black;
+
+	EHairVisibilityMode HairVisibilityMode = EHairVisibilityMode::Default;
+	EEarRingVisibilityMode EarRingVisibilityMode = EEarRingVisibilityMode::Default;
 };
+

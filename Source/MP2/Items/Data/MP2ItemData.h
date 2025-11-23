@@ -7,10 +7,16 @@
 #include "MP2.h"
 #include "MP2ItemData.generated.h"
 
+#define GENERATE_SETTER(Type, Name) \
+	FORCEINLINE void Set##Name(Type In##Name) { Name = In##Name;}
 
-/**
- * 
- */
+#define GENERATE_GETTER(Type, Name) \
+	FORCEINLINE Type Get##Name() const { return Name; }
+
+#define GENERATE_SETTER_AND_GETTER(Type, Name)	\
+	GENERATE_SETTER(Type, Name)					\
+	GENERATE_GETTER(Type, Name)					\
+
 UCLASS(Abstract, BlueprintType)
 class MP2_API UMP2ItemData : public UPrimaryDataAsset
 {

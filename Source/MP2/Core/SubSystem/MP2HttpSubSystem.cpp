@@ -35,7 +35,7 @@ void UMP2HttpSubSystem::SendRequest
 		{
 			if (!bProcessedSuccessfully || !Response.IsValid())
 			{
-				Callback.ExecuteIfBound(FAPIResponse{ true, "NetworkError", nullptr });
+				Callback.ExecuteIfBound(FAPIResponse{ true, TEXT("NetworkError"), nullptr });
 				return;
 			}
 
@@ -45,18 +45,18 @@ void UMP2HttpSubSystem::SendRequest
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseContent);
 			if (!FJsonSerializer::Deserialize(Reader, JsonObject) || !JsonObject.IsValid())
 			{
-				Callback.ExecuteIfBound(FAPIResponse{ false, "Response Parsing Error", nullptr });
+				Callback.ExecuteIfBound(FAPIResponse{ false, TEXT("Response Parsing Error"), nullptr });
 				return;
 			}
 
 			FAPIResponse OutResponse;
-			OutResponse.Error = JsonObject->GetBoolField("error");
-			OutResponse.Message = JsonObject->GetStringField("message");
+			OutResponse.Error = JsonObject->GetBoolField(TEXT("error"));
+			OutResponse.Message = JsonObject->GetStringField(TEXT("message"));
 			OutResponse.Data = nullptr;
 
-			if (JsonObject->HasTypedField<EJson::Object>("data"))
+			if (JsonObject->HasTypedField<EJson::Object>(TEXT("data")))
 			{
-				OutResponse.Data = JsonObject->GetObjectField("data");
+				OutResponse.Data = JsonObject->GetObjectField(TEXT("data"));
 			}
 
 			Callback.ExecuteIfBound(OutResponse);
