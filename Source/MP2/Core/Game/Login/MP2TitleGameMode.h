@@ -11,8 +11,8 @@
  * 
  */
 
-DECLARE_DELEGATE_TwoParams(FOnLoginResponse, bool /*bSuccess*/, const FString& /*Message*/);
-DECLARE_DELEGATE_TwoParams(FOnRegisterResponse, bool /*bSuccess*/, const FString& /*Message*/);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLoginResponse, bool, bSuccess, const FString&, Message);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRegisterResponse, bool, bSuccess, const FString, Message);
 
 UCLASS()
 class MP2_API AMP2TitleGameMode : public AGameModeBase

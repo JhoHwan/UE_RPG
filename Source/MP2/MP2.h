@@ -7,6 +7,7 @@
 UENUM(BlueprintType)
 enum class EGenderType : uint8
 {
+	None		UMETA(DisplayName = "Male"),
 	Male		UMETA(DisplayName = "Male"),
 	Female		UMETA(DisplayName = "Female"),
 };
@@ -15,7 +16,7 @@ UENUM(BlueprintType)
 enum class EItemType : uint8
 {
 	None			UMETA(DisplayName = "None"),
-	Gear			UMETA(DisplayName = "Gear"),
+	Gear			UMETA(DisplayName = "Gear"), 
 	Appearance		UMETA(DisplayName = "Appearance"),
 	Consumable		UMETA(DisplayName = "Consumable"),
 };
@@ -23,6 +24,7 @@ enum class EItemType : uint8
 UENUM(BlueprintType)
 enum class ERarity : uint8
 {
+	None			UMETA(DisplayName = "None"),
 	Normal			UMETA(DisplayName = "Normal"),
 	Rare			UMETA(DisplayName = "Rare"),
 	Elite			UMETA(DisplayName = "Elite"),
@@ -42,11 +44,14 @@ enum class EGearSlot : uint8
 	Belt		UMETA(DisplayName = "Belt"),
 	Pendant		UMETA(DisplayName = "Pendant"),
 	Cape		UMETA(DisplayName = "Cape"),
+	LWeapon		UMETA(DisplayName = "LWeapon"),
+	RWeapon		UMETA(DisplayName = "RWeapon"),
 };
 
 UENUM(BlueprintType)
 enum class EHairVisibilityMode : uint8
 {
+	None		UMETA(DisplayName = "None"),
 	Default		UMETA(DisplayName = "Default"),
 	Override	UMETA(DisplayName = "Override"),
 	Hide		UMETA(DisplayName = "Hide"),
@@ -55,6 +60,7 @@ enum class EHairVisibilityMode : uint8
 UENUM(BlueprintType)
 enum class EEarRingVisibilityMode : uint8
 {
+	None		UMETA(DisplayName = "None"),
 	Default		UMETA(DisplayName = "Default"),
 	Override	UMETA(DisplayName = "Override"),
 	Hide		UMETA(DisplayName = "Hide"),

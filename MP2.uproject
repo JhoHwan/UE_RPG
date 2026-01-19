@@ -14,9 +14,12 @@
 			]
 		},
 		{
-			"name": "MP2Editor",
-			"type": "Editor",
-			"loadingPhase": "PostEngineInit"
+			"Name": "GameNet",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [

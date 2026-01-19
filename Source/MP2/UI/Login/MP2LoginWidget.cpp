@@ -98,7 +98,7 @@ void UMP2LoginWidget::TryLogin()
 
 	Blocker->SetVisibility(ESlateVisibility::Visible);
 
-	TitleGameMode->TryLogin(Email, Password, FOnLoginResponse::CreateUObject(this, &UMP2LoginWidget::OnLoginResponse));
+	//TitleGameMode->TryLogin(Email, Password, FOnLoginResponse::CreateUObject(this, &UMP2LoginWidget::OnLoginResponse));
 }
 
 void UMP2LoginWidget::OnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)

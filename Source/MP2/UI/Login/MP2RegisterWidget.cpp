@@ -79,7 +79,7 @@ void UMP2RegisterWidget::TryRegister()
 
 	Blocker->SetVisibility(ESlateVisibility::Visible);
 
-	TitleGameMode->TryRegister(Email, Password, FOnRegisterResponse::CreateUObject(this, &UMP2RegisterWidget::OnRegisterResponse));
+	//TitleGameMode->TryRegister(Email, Password, FOnRegisterResponse::CreateUObject(this, &UMP2RegisterWidget::OnRegisterResponse));
 }
 
 void UMP2RegisterWidget::OnRegisterResponse(bool bSuccess, const FString& Message)

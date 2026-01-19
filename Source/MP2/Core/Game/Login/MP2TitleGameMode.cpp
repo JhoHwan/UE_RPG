@@ -8,8 +8,8 @@ void AMP2TitleGameMode::TryLogin(const FString& Email, const FString& Password, 
 {
 	OnLoginResponseCallback = Callback;
 
-	SendAuthRequest(LoginUrl, Email, Password,
-		FOnHttpRequestComplete::CreateUObject(this, &AMP2TitleGameMode::OnLoginResponse));
+	/*SendAuthRequest(LoginUrl, Email, Password,
+		FOnHttpRequestComplete::CreateUObject(this, &AMP2TitleGameMode::OnLoginResponse));*/
 }
 
 void AMP2TitleGameMode::OnLoginResponse(const FAPIResponse& Response)
@@ -25,24 +25,25 @@ void AMP2TitleGameMode::OnLoginResponse(const FAPIResponse& Response)
 		}
 	}
 
-	OnLoginResponseCallback.Execute(!Response.Error, Response.Message);
-	OnLoginResponseCallback.Unbind();
+	//OnLoginResponseCallback.Execute(!Response.Error, Response.Message);
+	//OnLoginResponseCallback.Unbind();
+
 }
 
 void AMP2TitleGameMode::TryRegister(const FString& Email, const FString& Password, FOnRegisterResponse Callback)
 {
 	OnRegisterResponseCallback = Callback;
 
-	SendAuthRequest(RegisterUrl, Email, Password,
-		FOnHttpRequestComplete::CreateUObject(this, &AMP2TitleGameMode::OnRegisterResponse));
+	/*SendAuthRequest(RegisterUrl, Email, Password,
+		FOnHttpRequestComplete::CreateUObject(this, &AMP2TitleGameMode::OnRegisterResponse));*/
 }
 
 void AMP2TitleGameMode::OnRegisterResponse(const FAPIResponse& Response)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s"), *Response.Message);
 
-	OnRegisterResponseCallback.Execute(!Response.Error, Response.Message);
-	OnRegisterResponseCallback.Unbind();
+	//OnRegisterResponseCallback.Execute(!Response.Error, Response.Message);
+	//OnRegisterResponseCallback.Unbind();
 }
 
 void AMP2TitleGameMode::SendAuthRequest(const FString& Url, const FString& Email, const FString& Password, FOnHttpRequestComplete Callback)

@@ -4,6 +4,7 @@
 #include "Character/MP2HumanCharacterBase.h"
 #include "ActorComponents\MP2CharacterAppearanceComponent.h"
 #include "Items\Data\Gear\MP2GearItemData.h"
+#include "GameNet\Public\GameNetSubsystem.h"
 
 // Sets default values
 AMP2HumanCharacterBase::AMP2HumanCharacterBase() : Super()
@@ -25,6 +26,7 @@ AMP2HumanCharacterBase::AMP2HumanCharacterBase() : Super()
 		FaceMesh->SetupAttachment(DefaultMesh, TEXT("Bip01-Head"));
 		FaceMesh->SetRelativeLocation(FVector3d(-80.0, 0.0, 0.0));
 		FaceMesh->SetRelativeRotation(FRotator(90.0, 90.0, -90.0));
+
 	}
 
 	HairMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HR"));
@@ -79,4 +81,11 @@ void AMP2HumanCharacterBase::PostInitializeComponents()
 void AMP2HumanCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	auto* GameNetSubSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGameNetSubsystem>();
+	bool result = GameNetSubSystem->ConnectToGameServer(TEXT("127.0.0.1"), 7777);
+	if (result)
+	{
+		
+	}
 }

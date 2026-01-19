@@ -1,5 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class MP2 : ModuleRules
@@ -10,8 +11,8 @@ public class MP2 : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[] { "MP2" });
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "GameplayTags", "GameplayTasks" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "GameplayTags", "GameplayTasks"});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "HTTP", "Json", "Slate", "SlateCore" });
-	}
+		PrivateDependencyModuleNames.AddRange(new string[] { "HTTP", "Json", "Slate", "SlateCore", "GameNet", "ProtobufCore" });
+    }
 }
