@@ -17,8 +17,12 @@ class MP2_API UMP2HttpSubSystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 public:
-	void SendRequest(const FString& Url, const FString& Inverb, const FString& Content, FOnHttpRequestComplete Callback, bool bUseAuth = false, const FAuthInfo* AuthInfo = nullptr);
+	void SendRequest(const FString& Url, const FString& Inverb, const FString& Content, FOnHttpRequestComplete Callback, bool bUseAuth = false);
+
+	void LogIn(const FString& Token) { AuthInfo.bLogin = true; AuthInfo.Token = Token; }
+	void LogOut() { AuthInfo = { 0, }; }
 
 private:
-	const FString DefaultUrl{ TEXT("https://localhost:7013") };
+	const FString DefaultUrl{ TEXT("http://localhost:5043") };
+	FAuthInfo AuthInfo;
 };

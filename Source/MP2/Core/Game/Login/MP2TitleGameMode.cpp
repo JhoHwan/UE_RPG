@@ -1,49 +1,56 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MP2TitleGameMode.h"
 #include "Core/SubSystem/MP2HttpSubSystem.h"
+#include "Core/SaveGame/MP2LoginSaveGame.h"
+#include "Kismet/GameplayStatics.h"
 
-void AMP2TitleGameMode::TryLogin(const FString& Email, const FString& Password, FOnLoginResponse Callback)
+void AMP2TitleGameMode::TryLogin(const FString& Email, const FString& Password)
 {
-	OnLoginResponseCallback = Callback;
-
-	/*SendAuthRequest(LoginUrl, Email, Password,
-		FOnHttpRequestComplete::CreateUObject(this, &AMP2TitleGameMode::OnLoginResponse));*/
+	SendAuthRequest(LoginUrl, Email, Password,
+		FOnHttpRequestComplete::CreateUObject(this, &AMP2TitleGameMode::LoginResultHandler));
 }
 
-void AMP2TitleGameMode::OnLoginResponse(const FAPIResponse& Response)
+void AMP2TitleGameMode::LoginResultHandler(const FAPIResponse& Response)
 {
-	UE_LOG(LogTemp, Log, TEXT("%s"), *Response.Message);
+	bool bSuccess = Response.ErrorCode == 0;
+	FString Message = ErrorCodeToMessage(Response.ErrorCode);
 
-	if (!Response.Error)
+	if (bSuccess)
 	{
 		if (Response.Data.IsValid() && Response.Data->HasField(TEXT("token")))
-		{ 
-			AuthInformation.bLogin = true;
-			AuthInformation.Token = Response.Data->GetStringField(TEXT("token"));
+		{
+			UMP2HttpSubSystem* HttpSubSystem = GetGameInstance()->GetSubsystem<UMP2HttpSubSystem>();
+			HttpSubSystem->LogIn(Response.Data->GetStringField(TEXT("token")));
+		}
+		else
+		{
+			bSuccess = false;
+			Message = ErrorCodeToMessage(5);
 		}
 	}
 
-	//OnLoginResponseCallback.Execute(!Response.Error, Response.Message);
-	//OnLoginResponseCallback.Unbind();
-
+	if (OnLoginResponse.IsBound())
+	{
+		OnLoginResponse.Broadcast(bSuccess, Message);
+	}
 }
 
-void AMP2TitleGameMode::TryRegister(const FString& Email, const FString& Password, FOnRegisterResponse Callback)
+void AMP2TitleGameMode::TryRegister(const FString& Email, const FString& Password)
 {
-	OnRegisterResponseCallback = Callback;
-
-	/*SendAuthRequest(RegisterUrl, Email, Password,
-		FOnHttpRequestComplete::CreateUObject(this, &AMP2TitleGameMode::OnRegisterResponse));*/
+	SendAuthRequest(RegisterUrl, Email, Password,
+		FOnHttpRequestComplete::CreateUObject(this, &AMP2TitleGameMode::RegisterResultHandler));
 }
 
-void AMP2TitleGameMode::OnRegisterResponse(const FAPIResponse& Response)
+void AMP2TitleGameMode::RegisterResultHandler(const FAPIResponse& Response)
 {
-	UE_LOG(LogTemp, Log, TEXT("%s"), *Response.Message);
+	bool bSuccess = Response.ErrorCode == 0;
 
-	//OnRegisterResponseCallback.Execute(!Response.Error, Response.Message);
-	//OnRegisterResponseCallback.Unbind();
+	if (OnRegisterResponse.IsBound())
+	{
+		OnRegisterResponse.Broadcast(bSuccess, ErrorCodeToMessage(Response.ErrorCode));
+	}
 }
 
 void AMP2TitleGameMode::SendAuthRequest(const FString& Url, const FString& Email, const FString& Password, FOnHttpRequestComplete Callback)
@@ -64,4 +71,29 @@ void AMP2TitleGameMode::SendAuthRequest(const FString& Url, const FString& Email
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
 	HttpSubSystem->SendRequest(Url, TEXT("POST"), Content, Callback);
+}
+
+FString AMP2TitleGameMode::ErrorCodeToMessage(int32 InErrorCode)
+{
+	if (InErrorCode == 0) return {};
+	FString OutMessage;
+	switch (InErrorCode)
+	{
+	case 2:
+		OutMessage = TEXT("서버와 연결할 수 없습니다.\n잠시 후 다시 시도하세요.");
+		break;
+	case 1001:
+		OutMessage = TEXT("로그인 정보가 올바르지 않습니다");
+		break;
+	case 1002:
+		OutMessage = TEXT("정지된 계정입니다");
+		break;
+	case 1010:
+		OutMessage = TEXT("이미 가입된 이메일입니다");
+		break;
+	default:
+		OutMessage = FString::Printf(TEXT("알 수 없는 오류가 발생했습니다.\n(Code: %d)"), InErrorCode);
+		break;
+	}
+	return OutMessage;
 }

@@ -24,14 +24,19 @@ void UGameNetSubsystem::Deinitialize()
 
 bool UGameNetSubsystem::ConnectToGameServer(const FString& IP, int32 Port)
 {
+	if (bRunning) return false;
+	bRunning = true;
+
 	Session = MakeShared<FGNSession>(IP, Port);
-	Session->SetConnectHandler(FOnConnectResult::CreateWeakLambda(this,
+	Session->SetConnectHandler(FOnConnectResult::CreateWeakLambda(this, 
 		[this](bool bResult)
 		{
 			if (bResult)
 			{
 				GN_SCREENLOG("Connect Success");
-				bConnected = true;
+				Protocol::CS_REQ_ENTER_GAME Pkt;
+				
+				Session->RegisterSend(ClientPacketHandler::MakeSendBuffer(Pkt));
 			}
 			else
 			{
@@ -63,6 +68,8 @@ void UGameNetSubsystem::DestroySession()
 	{
 		Session.Reset();
 	}
+
+	bRunning = false;
 }
 
 // TickableObject 
@@ -72,16 +79,11 @@ void UGameNetSubsystem::Tick(float DeltaTime)
 	Time += DeltaTime;
 	if (Time > 1.0f)
 	{
-		//GN_SCREENLOG("UGameNetSubsystem::Tick");
+		GN_SCREENLOG("Send Ping");
 		Time = 0;
-		for (int i = 0; i < 5; i++)
-		{
-			Protocol::CS_PING Packet;
-			Packet.set_id(i+1);
-			auto SendBuffer = ClientPacketHandler::MakeSendBuffer(Packet);
-			if (!SendBuffer) return;
-			Session->RegisterSend(SendBuffer);
-		}
+		Protocol::CS_PING Packet;
+		Packet.set_id(1);
+		Session->RegisterSend(ClientPacketHandler::MakeSendBuffer(Packet));
 	}
 }
 
@@ -90,7 +92,7 @@ bool UGameNetSubsystem::IsTickable() const
 	if (IsTemplate()) return false;
 	if (!Session) return false;
 
-	return bConnected;
+	return Session->IsRunning();
 }
 
 bool UGameNetSubsystem::IsTickableWhenPaused() const

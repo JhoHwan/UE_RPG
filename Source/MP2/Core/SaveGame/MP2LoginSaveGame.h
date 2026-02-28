@@ -16,13 +16,29 @@ class MP2_API UMP2LoginSaveGame : public USaveGame
 public:
 	UMP2LoginSaveGame();
 
-public:
-	static FString SaveSlotName;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static FString GetSlotName() { return SaveSlotName; }
 
-	UPROPERTY(VisibleAnywhere)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE FText GetEmailText() const { return FText::FromString(Email); }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetEmail(FText InEmail){ Email = InEmail.ToString(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE bool IsRemember() const { return bRemember; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetRemember(bool InRemember) { bRemember = InRemember; }
+
+
+public:
+	static const FString SaveSlotName;
+
+	UPROPERTY()
 	FString Email;
 
-	UPROPERTY(VisibleAnywhere)
-	bool bRememberEmail;
+	UPROPERTY()
+	bool bRemember;
 
 };

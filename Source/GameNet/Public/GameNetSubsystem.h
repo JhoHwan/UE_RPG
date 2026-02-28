@@ -19,6 +19,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
+	UFUNCTION(BlueprintCallable)
 	bool ConnectToGameServer(const FString& IP, int32 Port);
 
 public:
@@ -33,5 +34,5 @@ private:
 private:
 	TSharedPtr<class FGNSession> Session;
 	FRunnableThread* SessionThread;
-	bool bConnected = false;
+	bool bRunning = false;
 };

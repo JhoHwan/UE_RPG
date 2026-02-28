@@ -5,8 +5,12 @@
 #include "Engine/World.h"
 #include "Components/Widget.h"
 
-void UMP2BlueprintFunctionLibrary::SetFocusToWidget(UWorld* World, UWidget* Widget)
+void UMP2BlueprintFunctionLibrary::SetFocusToWidget(const UObject* WorldContextObject, UWidget* Widget)
 {
+	if (!Widget) return;
+
+	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+
 	if (World)
 	{
 		FTimerHandle Tmp;
@@ -16,7 +20,7 @@ void UMP2BlueprintFunctionLibrary::SetFocusToWidget(UWorld* World, UWidget* Widg
 				{
 					Widget->SetKeyboardFocus();
 				}),
-			0.2f, false);
+			0.1f, false);
 	}
 }
 

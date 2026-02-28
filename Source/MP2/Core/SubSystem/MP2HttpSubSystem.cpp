@@ -6,7 +6,7 @@
 
 void UMP2HttpSubSystem::SendRequest
 	(const FString& InUrl, const FString& Inverb, 
-	const FString& Content, FOnHttpRequestComplete Callback, bool bUseAuth, const FAuthInfo* AuthInfo)
+	const FString& Content, FOnHttpRequestComplete Callback, bool bUseAuth)
 {
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
@@ -19,13 +19,14 @@ void UMP2HttpSubSystem::SendRequest
 
 	if (bUseAuth)
 	{
-		if (!AuthInfo->bLogin)
+		if (!AuthInfo.bLogin)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("User is not logged in"));
+			Callback.ExecuteIfBound(FAPIResponse{ 1 });
 		}
 		else
 		{
-			FString AuthHeader = FString::Printf(TEXT("Bearer %s"), *AuthInfo->Token);
+			FString AuthHeader = FString::Printf(TEXT("Bearer %s"), *(AuthInfo.Token));
 			Request->SetHeader(TEXT("Authorization"), AuthHeader);
 		}
 	}
@@ -35,7 +36,7 @@ void UMP2HttpSubSystem::SendRequest
 		{
 			if (!bProcessedSuccessfully || !Response.IsValid())
 			{
-				Callback.ExecuteIfBound(FAPIResponse{ true, TEXT("NetworkError"), nullptr });
+				Callback.ExecuteIfBound(FAPIResponse{ 2 });
 				return;
 			}
 
@@ -45,13 +46,12 @@ void UMP2HttpSubSystem::SendRequest
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseContent);
 			if (!FJsonSerializer::Deserialize(Reader, JsonObject) || !JsonObject.IsValid())
 			{
-				Callback.ExecuteIfBound(FAPIResponse{ false, TEXT("Response Parsing Error"), nullptr });
+				Callback.ExecuteIfBound(FAPIResponse{ 1 });
 				return;
 			}
 
 			FAPIResponse OutResponse;
-			OutResponse.Error = JsonObject->GetBoolField(TEXT("error"));
-			OutResponse.Message = JsonObject->GetStringField(TEXT("message"));
+			OutResponse.ErrorCode = JsonObject->GetNumberField(TEXT("errorcode"));
 			OutResponse.Data = nullptr;
 
 			if (JsonObject->HasTypedField<EJson::Object>(TEXT("data")))

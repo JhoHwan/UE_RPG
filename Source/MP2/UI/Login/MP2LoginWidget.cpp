@@ -143,7 +143,7 @@ bool UMP2LoginWidget::SaveLoginInfo(bool bRememberEmail, const FString& Email)
 	if (LoginSaveGame)
 	{
 		bCurRememberEmail = bRememberEmail;
-		LoginSaveGame->bRememberEmail = bRememberEmail;
+		LoginSaveGame->bRemember = bRememberEmail;
 		LoginSaveGame->Email = Email;
 
 		return UGameplayStatics::SaveGameToSlot(LoginSaveGame, UMP2LoginSaveGame::SaveSlotName, 0);
@@ -158,7 +158,7 @@ bool UMP2LoginWidget::LoadLoginInfo(FString& OutEmail, bool& OutRememberMe)
 	if (LoadedLoginSaveGame)
 	{
 		OutEmail = LoadedLoginSaveGame->Email;
-		OutRememberMe = LoadedLoginSaveGame->bRememberEmail;
+		OutRememberMe = LoadedLoginSaveGame->bRemember;
 		return true;
 	}
 

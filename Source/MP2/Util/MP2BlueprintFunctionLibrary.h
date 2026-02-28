@@ -15,8 +15,8 @@ class MP2_API UMP2BlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	static void SetFocusToWidget(class UWorld* World, class UWidget* Widget);
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+	static void SetFocusToWidget(const UObject* WorldContextObject, class UWidget* Widget);
 
 	UFUNCTION(BlueprintCallable)
 	static bool IsValidEmailFormat(const FString& Email);

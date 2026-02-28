@@ -15,6 +15,10 @@ FGNSession::FGNSession(const FString& IP, int32 Port)
 
 FGNSession::~FGNSession()
 {
+	if (Socket)
+	{
+		Exit();
+	}
 }
 
 
@@ -23,12 +27,17 @@ uint32 FGNSession::Run()
 	GN_LOG("Session Start Run");
 
 	bool bConnected = TryConnect();
+	TWeakPtr<FGNSession> WeakPtr = AsWeak();
 
-	AsyncTask(ENamedThreads::GameThread, [this, bConnected]
+	AsyncTask(ENamedThreads::GameThread, [WeakPtr, bConnected]
 		{
-			if (OnConnectResult.IsBound())
+			if (WeakPtr.IsValid())
 			{
-				OnConnectResult.Execute(bConnected);
+				auto ThisPtr = WeakPtr.Pin();
+				if (ThisPtr->OnConnectResult.IsBound())
+				{
+					ThisPtr->OnConnectResult.Execute(bConnected);
+				}
 			}
 		});
 
@@ -185,9 +194,11 @@ int32 FGNSession::SendPacket()
 	while (!SendQueue.IsEmpty())
 	{
 		SendBufferRef SendBuffer = nullptr;
-		SendQueue.Dequeue(SendBuffer);
 
+		if (!SendQueue.Peek(SendBuffer)) break;
 		if (MaxSendSize < TotalSize + SendBuffer->WriteSize()) break;
+
+		SendQueue.Pop();
 		TotalSize += SendBuffer->WriteSize();
 		PacketCnt++;
 		SendBufferChunk.Append(SendBuffer->Buffer(), SendBuffer->WriteSize());
@@ -204,6 +215,7 @@ int32 FGNSession::SendPacket()
 			GN_WARN("Send Failed", PacketCnt, TotalSize);
 
 			Disconnect();
+			return -1;
 		}
 
 		BufferPtr += ByteSent;

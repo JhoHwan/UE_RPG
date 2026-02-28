@@ -3,8 +3,9 @@
 
 #include "Core/SaveGame/MP2LoginSaveGame.h"
 
-FString UMP2LoginSaveGame::SaveSlotName{ TEXT("RPGLoginSaveSlot") };
+const FString UMP2LoginSaveGame::SaveSlotName{ TEXT("LoginData") };
 
-UMP2LoginSaveGame::UMP2LoginSaveGame() : Email(TEXT("")), bRememberEmail(false)
+UMP2LoginSaveGame::UMP2LoginSaveGame() : Email(TEXT("")), bRemember(false)
 {
 }
+

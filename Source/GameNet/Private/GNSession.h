@@ -38,6 +38,8 @@ public:
 	void Disconnect();
 	void RegisterSend(SendBufferRef SendBuffer);
 
+	bool IsRunning() const { return bIsRunning; }
+
 private:
 	int32 RecvPacket();
 	int32 HandlePacket();

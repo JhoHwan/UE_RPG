@@ -12,7 +12,7 @@
  */
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLoginResponse, bool, bSuccess, const FString&, Message);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRegisterResponse, bool, bSuccess, const FString, Message);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRegisterResponse, bool, bSuccess, const FString&, Message);
 
 UCLASS()
 class MP2_API AMP2TitleGameMode : public AGameModeBase
@@ -20,26 +20,30 @@ class MP2_API AMP2TitleGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	void TryLogin(const FString& Email, const FString& Password, FOnLoginResponse Callback);
-	void OnLoginResponse(const struct FAPIResponse& Response);
 
-	void TryRegister(const FString& Email, const FString& Password, FOnRegisterResponse Callback);
-	void OnRegisterResponse(const struct FAPIResponse& Response);
+	UFUNCTION(BlueprintCallable)
+	void TryLogin(const FString& Email, const FString& Password);
 
 
-	FORCEINLINE const FAuthInfo& GetAuthInfo() const { return AuthInformation; }
+	UFUNCTION(BlueprintCallable)
+	void TryRegister(const FString& Email, const FString& Password);
 
 private:
-	FOnLoginResponse OnLoginResponseCallback;
-	FOnRegisterResponse OnRegisterResponseCallback;
 
-private: 
+	void LoginResultHandler(const FAPIResponse& Response);
+	void RegisterResultHandler(const FAPIResponse& Response);
+
 	void SendAuthRequest(const FString& Url, const FString& Email, const FString& Password, FOnHttpRequestComplete Callback);
+	FString ErrorCodeToMessage(int32 InErrorCode);
+
+private:
+	UPROPERTY(BlueprintAssignable, meta = (AllowPrivateAccess = "true"))
+	FOnLoginResponse OnLoginResponse;
+
+	UPROPERTY(BlueprintAssignable, meta = (AllowPrivateAccess = "true"))
+	FOnRegisterResponse OnRegisterResponse;
 
 private:
 	const FString LoginUrl{TEXT("/api/Auth/Login")};
 	const FString RegisterUrl{ TEXT("/api/Auth/Register") };
-
-
-	FAuthInfo AuthInformation{ TEXT(""), false };
 };

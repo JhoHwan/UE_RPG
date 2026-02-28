@@ -9,13 +9,12 @@ struct FAPIResponse
 {
 	GENERATED_BODY()
 
-	bool Error = false;
-	FString Message;
+	int32 ErrorCode = 0;
 	TSharedPtr<FJsonObject> Data;
 };
 
 struct FAuthInfo
 {
-	FString Token;
 	bool bLogin{ false };
+	FString Token;
 };
