@@ -9,7 +9,7 @@ public class GameNet : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine"});
 		PrivateDependencyModuleNames.AddRange(new string[] { "ProtobufCore", "Sockets", "Networking" });
  
-		PublicIncludePaths.AddRange(new string[] { "GameNet/Public" });
-		PrivateIncludePaths.AddRange(new string[] { "GameNet/Private" });
+		PublicIncludePaths.AddRange(new string[] { "GameNet/Public"});
+		PrivateIncludePaths.AddRange(new string[] { "GameNet/Private"});
 	}
 }

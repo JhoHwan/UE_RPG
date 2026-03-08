@@ -28,6 +28,8 @@ public:
 	virtual bool IsTickableWhenPaused() const override;
 	virtual TStatId GetStatId() const override;
 
+	void RegisterSend(TSharedPtr<class FSendBuffer> SendBuffer);
+
 private:
 	void DestroySession();
 

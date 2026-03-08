@@ -11,7 +11,8 @@ public class MP2 : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[] { "MP2" });
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "GameplayTags", "GameplayTasks"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "GameplayTags", "GameplayTasks", "Navmesh",
+			"NavigationSystem",});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "HTTP", "Json", "Slate", "SlateCore", "GameNet", "ProtobufCore" });
     }

@@ -1,0 +1,21 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/PlayerController.h"
+#include "MP2PlayerContoroller.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class MP2_API AMP2PlayerContoroller : public APlayerController
+{
+	GENERATED_BODY()
+	
+public:
+	UFUNCTION(BlueprintCallable)
+	void RequestMove(const FVector& Dest);
+	
+};

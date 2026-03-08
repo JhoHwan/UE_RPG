@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Proto\ClientPacketHandler.h"
+#include "ClientPacketHandler.h"
 
-DECLARE_DELEGATE_OneParam(FOnConnectResult, bool)
+DECLARE_DELEGATE_OneParam(FOnConnect, bool)
 DECLARE_DELEGATE_OneParam(FOnDisconnect, const FString&)
 
 
@@ -18,12 +18,12 @@ public:
 	FGNSession(const FString& IP, int32 Port);
 	~FGNSession();
 
-	void SetConnectHandler(const FOnConnectResult& InDelegate)
+	void SetConnectHandler(const FOnConnect& InDelegate)
 	{
 		OnConnectResult = InDelegate;
 	}
 
-	void SetConnectHandler(const FOnDisconnect& InDelegate)
+	void SetDisConnectHandler(const FOnDisconnect& InDelegate)
 	{
 		OnDisconnect = InDelegate;
 	}
@@ -46,10 +46,8 @@ private:
 
 	int32 SendPacket();
 
-public:
-
 private:
-	FOnConnectResult OnConnectResult;
+	FOnConnect OnConnectResult;
 	FOnDisconnect OnDisconnect;
 
 	FString IP;

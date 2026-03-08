@@ -5,7 +5,7 @@
 #include "SocketSubsystem.h"
 #include "Networking.h"
 #include "GNSession.h"
-#include "Proto\ClientPacketHandler.h"
+#include "ClientPacketHandler.h"
 
 #include "GNLogMagro.h"
 
@@ -28,8 +28,7 @@ bool UGameNetSubsystem::ConnectToGameServer(const FString& IP, int32 Port)
 	bRunning = true;
 
 	Session = MakeShared<FGNSession>(IP, Port);
-	Session->SetConnectHandler(FOnConnectResult::CreateWeakLambda(this, 
-		[this](bool bResult)
+	Session->SetConnectHandler(FOnConnect::CreateWeakLambda(this, [this](bool bResult)
 		{
 			if (bResult)
 			{
@@ -40,8 +39,11 @@ bool UGameNetSubsystem::ConnectToGameServer(const FString& IP, int32 Port)
 			}
 			else
 			{
-				GN_SCREENLOG("Connect Failed");
-				DestroySession();
+				AsyncTask(ENamedThreads::GameThread, [this]()
+				{
+					GN_SCREENLOG("Connect Failed");
+					DestroySession();
+				});
 			}
 		}));
 
@@ -77,7 +79,7 @@ void UGameNetSubsystem::Tick(float DeltaTime)
 {
 	static float Time = 0;
 	Time += DeltaTime;
-	if (Time > 1.0f)
+	if (Time > 10.0f)
 	{
 		GN_SCREENLOG("Send Ping");
 		Time = 0;
@@ -104,4 +106,10 @@ bool UGameNetSubsystem::IsTickableWhenPaused() const
 TStatId UGameNetSubsystem::GetStatId() const
 {
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UGameNetSubsystem, STATGROUP_Tickables);
+}
+
+void UGameNetSubsystem::RegisterSend(TSharedPtr<FSendBuffer> SendBuffer)
+{
+	if (!bRunning) return;
+	Session->RegisterSend(MoveTemp(SendBuffer));
 }
