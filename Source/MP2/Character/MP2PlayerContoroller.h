@@ -15,7 +15,8 @@ class MP2_API AMP2PlayerContoroller : public APlayerController
 	GENERATED_BODY()
 	
 public:
+	AMP2PlayerContoroller();
+	
 	UFUNCTION(BlueprintCallable)
 	void RequestMove(const FVector& Dest);
-	
 };

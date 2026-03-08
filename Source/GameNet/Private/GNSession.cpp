@@ -33,7 +33,7 @@ uint32 FGNSession::Run()
 		{
 			if (WeakPtr.IsValid())
 			{
-				auto ThisPtr = WeakPtr.Pin();
+				TSharedPtr<FGNSession> ThisPtr = WeakPtr.Pin();
 				if (ThisPtr->OnConnectResult.IsBound())
 				{
 					ThisPtr->OnConnectResult.Execute(bConnected);
@@ -121,7 +121,7 @@ void FGNSession::Disconnect()
 	return;
 }
 
-void FGNSession::RegisterSend(SendBufferRef SendBuffer)
+void FGNSession::RegisterSend(TSharedPtr<FSendBuffer> SendBuffer)
 {
 	SendQueue.Enqueue(SendBuffer);
 }
@@ -171,7 +171,7 @@ int32 FGNSession::HandlePacket()
 			return -1;
 		}
 
-		ClientPacketHandler::HandlePacket(Session, Buffer + ProcessLen, Header->size);
+		OnRecvPacket.ExecuteIfBound(Session, Buffer + ProcessLen, Header->size);
 
 		ProcessLen += Header->size;
 		PacketCnt++;
@@ -193,7 +193,7 @@ int32 FGNSession::SendPacket()
 
 	while (!SendQueue.IsEmpty())
 	{
-		SendBufferRef SendBuffer = nullptr;
+		TSharedPtr<FSendBuffer> SendBuffer = nullptr;
 
 		if (!SendQueue.Peek(SendBuffer)) break;
 		if (MaxSendSize < TotalSize + SendBuffer->WriteSize()) break;

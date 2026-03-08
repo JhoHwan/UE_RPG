@@ -3,14 +3,14 @@
 
 #include "MP2GameMode.h"
 
-#include "GameNetSubsystem.h"
-#include "ClientPacketHandler.h"
+#include "Network/MP2NetSubsystem.h"
+#include "Network/ClientPacketHandler.h"
 
 void AMP2GameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UGameNetSubsystem* GNSubSystem = GetGameInstance()->GetSubsystem<UGameNetSubsystem>();
+	UMP2NetSubsystem* GNSubSystem = GetGameInstance()->GetSubsystem<UMP2NetSubsystem>();
 	if (!GNSubSystem) return;
 	
 	Protocol::CS_FIELD_LOADING_COMPLETE pkt;

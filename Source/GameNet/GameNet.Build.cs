@@ -7,7 +7,7 @@ public class GameNet : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine"});
-		PrivateDependencyModuleNames.AddRange(new string[] { "ProtobufCore", "Sockets", "Networking" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Sockets", "Networking" });
  
 		PublicIncludePaths.AddRange(new string[] { "GameNet/Public"});
 		PrivateIncludePaths.AddRange(new string[] { "GameNet/Private"});

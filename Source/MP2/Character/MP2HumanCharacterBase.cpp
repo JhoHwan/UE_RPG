@@ -4,7 +4,7 @@
 #include "Character/MP2HumanCharacterBase.h"
 #include "ActorComponents\MP2CharacterAppearanceComponent.h"
 #include "Items\Data\Gear\MP2GearItemData.h"
-#include "GameNet\Public\GameNetSubsystem.h"
+//#include "GameNet\Public\GameNetSubsystem.h"
 
 // Sets default values
 AMP2HumanCharacterBase::AMP2HumanCharacterBase() : Super()
@@ -81,11 +81,4 @@ void AMP2HumanCharacterBase::PostInitializeComponents()
 void AMP2HumanCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	auto* GameNetSubSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGameNetSubsystem>();
-	bool result = GameNetSubSystem->ConnectToGameServer(TEXT("127.0.0.1"), 7777);
-	if (result)
-	{
-		
-	}
 }
