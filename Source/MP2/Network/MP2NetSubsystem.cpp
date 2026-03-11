@@ -1,17 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MP2NetSubsystem.h"
-#include "SocketSubsystem.h"
-#include "Networking.h"
 #include "GNSession.h"
 #include "ClientPacketHandler.h"
+#include "Character/MP2Character.h"
+#include "Core/MP2NetworkObjectSettings.h"
+#include "Components/CapsuleComponent.h"
 
 void UMP2NetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
 	ClientPacketHandler::Init();
+	
+	const UMP2NetworkObjectSettings* Settings = GetDefault<UMP2NetworkObjectSettings>();
+	if (Settings->PlayerClass)
+	{
+		DefaultPlayerClass = Settings->PlayerClass;
+	}
 }
 
 void UMP2NetSubsystem::Deinitialize()
@@ -25,34 +31,19 @@ bool UMP2NetSubsystem::ConnectToGameServer(const FString& IP, int32 Port)
 	if (bRunning) return false;
 	bRunning = true;
 
-	Session = MakeShared<FGNSession>(IP, Port);
+	Session = MakeShared<FGNSession>(IP, Port, GetGameInstance());
 	Session->OnRecvPacket.BindLambda([](SessionRef& Session, BYTE* buffer, int32 length)
 	{
 		bool result = ClientPacketHandler::HandlePacket(Session, buffer, length);
 	});
 	
-	Session->SetConnectHandler(FOnConnect::CreateWeakLambda(this, [this](bool bResult)
-		{
-			if (bResult == true)
-			{
-				Session->OwnerGameInstance = GetGameInstance();
-				Protocol::CS_REQ_ENTER_GAME Pkt;
-				
-				Session->RegisterSend(ClientPacketHandler::MakeSendBuffer(Pkt));
-			}
-			else
-			{
-				AsyncTask(ENamedThreads::GameThread, [this]()
-				{
-					DestroySession();
-				});
-			}
-		}));
+	FOnConnect OnConnect;
+	OnConnect.BindUObject(this, &UMP2NetSubsystem::HandleServerConnectionCompleted);
+	Session->SetConnectHandler(OnConnect);
 
 	SessionThread = FRunnableThread::Create(Session.Get(), TEXT("Network Thread"));
 	if (!SessionThread)
 	{
-		//
 		return false;
 	}
 
@@ -107,6 +98,48 @@ void UMP2NetSubsystem::OnReceiveTimeSync(const uint64 ClientTick, const uint64 S
 	UE_LOG(LogTemp, Log, TEXT("ClockOffset %lld"), ServerClockOffset.load())
 }
 
+void UMP2NetSubsystem::SpawnCharacter(const Protocol::PlayerInfo& PlayerInfo, bool IsOwnPlayer)
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	int64 id = PlayerInfo.object_info().id();
+	Protocol::Vector3 pos = PlayerInfo.object_info().pos();
+	FVector SpawnLocation {pos.x(), pos.y(), pos.z()};
+	FRotator SpawnRotator = FRotator::ZeroRotator;
+
+	if (!DefaultPlayerClass) return;
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	AMP2Character* Character = World->SpawnActor<AMP2Character>(DefaultPlayerClass, SpawnLocation, SpawnRotator, SpawnParams);
+	if (!Character) return;
+	
+	if (UCapsuleComponent* Capsule = Character->GetCapsuleComponent())
+	{
+		SpawnLocation.Z += Capsule->GetScaledCapsuleHalfHeight() / 2;
+	}
+	
+	Character->SetActorLocation(SpawnLocation);
+	NetworkObjectMap.Add(id, Character);
+	
+	if (IsOwnPlayer)
+	{
+		APlayerController* Controller = GetWorld()->GetFirstPlayerController();
+		if (!Controller) return;
+	
+		Controller->Possess(Character);
+	}
+}
+
+AActor* UMP2NetSubsystem::GetNetworkObject(uint64 ObjectId)
+{
+	AActor** ActorPtr = NetworkObjectMap.Find(ObjectId);
+	if (ActorPtr == nullptr) return nullptr;
+	return *ActorPtr;
+}
+
 void UMP2NetSubsystem::DestroySession()
 {
 	if (SessionThread)
@@ -125,15 +158,36 @@ void UMP2NetSubsystem::DestroySession()
 	bRunning = false;
 }
 
+void UMP2NetSubsystem::HandleServerConnectionCompleted(bool bSuccess)
+{
+	if (bSuccess == true)
+	{
+		Protocol::CS_REQ_ENTER_GAME Pkt;
+				
+		Session->RegisterSend(ClientPacketHandler::MakeSendBuffer(Pkt));
+	}
+	else
+	{
+		AsyncTask(ENamedThreads::GameThread, [this]()
+		{
+			DestroySession();
+		});
+	}
+	
+	if (OnServerConnectionCompleted.IsBound())
+	{
+		OnServerConnectionCompleted.Broadcast(bSuccess);
+	}
+}
+
 // TickableObject 
 void UMP2NetSubsystem::Tick(float DeltaTime)
 {
-	static float Time = 0;
-	Time += DeltaTime;
+	SyncTimeAccumulator += DeltaTime;
 	
-	if (Time > 10.0f)
+	if (SyncTimeAccumulator > 10.0f)
 	{
-		Time = 0;
+		SyncTimeAccumulator = 0;
 		RequestTimeSync();
 	}
 }
@@ -159,6 +213,7 @@ TStatId UMP2NetSubsystem::GetStatId() const
 
 void UMP2NetSubsystem::RegisterSend(TSharedPtr<FSendBuffer> SendBuffer)
 {
+	
 	if (!bRunning) return;
 	Session->RegisterSend(MoveTemp(SendBuffer));
 }

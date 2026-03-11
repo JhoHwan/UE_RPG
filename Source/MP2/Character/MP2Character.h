@@ -19,8 +19,8 @@ public:
 	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void MoveToLocationLocally(const FVector& Dest);
-	void OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int64 ServerStartTime);
+	void MoveToLocationLocally(const FVector& Dest, float Speed);
+	void OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int64 ServerStartTime, float Speed);
 	
 	virtual bool IsLocallyControlled() const override { return true; }
 

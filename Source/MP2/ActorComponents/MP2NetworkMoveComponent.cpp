@@ -39,15 +39,25 @@ void UMP2NetworkMoveComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	{
 		// 서버가 준 도착 지점의 X, Y는 칼같이 가져오되, 
 		FVector FinalDest = MoveWaypoints.Last();
+		FVector CurrentLoc = Owner->GetActorLocation();
         
 		// Z(높이)는 방금 전까지 예쁘게 맞춰둔 내 캐릭터의 현재 높이로 덮어쓰기 (덜컥거림 방지)
-		FinalDest.Z = Owner->GetActorLocation().Z;
+		FinalDest.Z = CurrentLoc.Z;
 
-		// 3. 보정된 최종 목적지로 스냅 및 이동 종료 (bSweep = false 로 물리 충돌 무시)
-		Owner->SetActorLocation(FinalDest, false);
-		bIsMoving = false;
-        
-		// (참고) 여기서 애니메이션 블루프린트(AnimBP) 변수를 건드려 걷기 모션을 꺼주면 됨
+		// [Soft Landing] 즉시 스냅 대신 부드럽게 이동 (수치가 클수록 더 빠르게 붙음)
+		FVector InterpLoc = FMath::VInterpTo(CurrentLoc, FinalDest, DeltaTime, 15.0f);
+
+		// 목적지에 거의 다 왔다면 (거리 2.0 미만) 최종 고정 및 이동 종료
+		if (FVector::Dist2D(InterpLoc, FinalDest) <= 2.0f)
+		{
+			Owner->SetActorLocation(FinalDest, false);
+			bIsMoving = false;
+		}
+		else
+		{
+			Owner->SetActorLocation(InterpLoc, false);
+		}
+		
 		return;
 	}
 

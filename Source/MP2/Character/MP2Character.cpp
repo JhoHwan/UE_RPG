@@ -21,7 +21,6 @@ void AMP2Character::BeginPlay()
 {
 	Super::BeginPlay();
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Custom);
-	GetGameInstance()->GetSubsystem<UMP2NetSubsystem>()->MyCharacter = this;
 }
 
 // Called to bind functionality to input
@@ -30,7 +29,7 @@ void AMP2Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AMP2Character::MoveToLocationLocally(const FVector& Dest)
+void AMP2Character::MoveToLocationLocally(const FVector& Dest, float Speed)
 {
 	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
 	if (!NavSys) return;
@@ -41,12 +40,12 @@ void AMP2Character::MoveToLocationLocally(const FVector& Dest)
 	{
 		if (NetworkMoveComp)
 		{
-			NetworkMoveComp->SetTargetMovePath(NavPath->PathPoints, 500.0f);
+			NetworkMoveComp->SetTargetMovePath(NavPath->PathPoints, Speed);
 		}
 	}
 }
 
-void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int64 ServerStartTime)
+void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int64 ServerStartTime, float Speed)
 {
 	if (!NetworkMoveComp || ServerWaypoints.Num() < 2) return;
 	
@@ -56,9 +55,9 @@ void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int
 	for (int i = 1; i < ServerWaypoints.Num(); i++)
 	{
 		const float Dist = FVector::Dist2D(ServerWaypoints[i - 1], ServerWaypoints[i]);
-		const float DeltaSeconds = Dist / 500.0;
+		const float DeltaSeconds = Dist / Speed;
 		
-		int64 TimeToReach = static_cast<int64>(DeltaSeconds * 1000.0f);
+		int64 TimeToReach = DeltaSeconds * 1000.0f;
 		AccumulatedTime += TimeToReach;
         
 		ComputedArrivalTimes.Add(AccumulatedTime);
@@ -121,6 +120,6 @@ void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int
 	
 	if (BlendedPath.Num() > 1)
 	{
-		NetworkMoveComp->SetTargetMovePath(BlendedPath, 500.0f);
+		NetworkMoveComp->SetTargetMovePath(BlendedPath, Speed);
 	}
 }
