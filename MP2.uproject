@@ -10,7 +10,8 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"UMG",
-				"Engine"
+				"Engine",
+				"Blutility"
 			]
 		},
 		{
@@ -19,6 +20,14 @@
 			"LoadingPhase": "PreDefault",
 			"AdditionalDependencies": [
 				"Engine"
+			]
+		},
+		{
+			"Name": "MP2Editor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"AdditionalDependencies": [
+				"Blutility"
 			]
 		}
 	],

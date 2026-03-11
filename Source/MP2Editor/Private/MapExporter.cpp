@@ -77,7 +77,7 @@ bool UMapExporter::ExportMapDataJson(int32 FieldId, const FString& MapName)
 		return false;
 	}
 	
-	FString OutPath = FPaths::ProjectDir() / TEXT("RecastCLI") / TEXT("Out") / (MapName + TEXT(".json"));
+	FString OutPath = FPaths::ProjectDir() / TEXT("RecastCLI") / TEXT("Fields") / (MapName + TEXT(".json"));
 	return FFileHelper::SaveStringToFile(OutputString, *OutPath);
 }
 
@@ -186,10 +186,18 @@ void UMapExporter::ExportStaticMeshToBin(UStaticMesh* StaticMesh, const FString&
 {
 	if (!StaticMesh) return;
 	
+	FString DirectoryPath = FPaths::ProjectDir() / TEXT("RecastCLI") / TEXT("Origin");
+	FString OutPath = DirectoryPath / (OutFileName + TEXT(".fbx"));
+	
+	if (!IFileManager::Get().DirectoryExists(*DirectoryPath))
+	{
+		IFileManager::Get().MakeDirectory(*DirectoryPath);
+	}
+	
 	UAssetExportTask* ExportTask = NewObject<UAssetExportTask>();
 	ExportTask->Object = StaticMesh;
 	ExportTask->Exporter = nullptr;
-	ExportTask->Filename = FPaths::ProjectSavedDir() / (OutFileName + TEXT(".fbx"));
+	ExportTask->Filename = OutPath;
 	ExportTask->bReplaceIdentical = false;
 	ExportTask->bPrompt = false;   
 	ExportTask->bUseFileArchive = false;
@@ -198,40 +206,15 @@ void UMapExporter::ExportStaticMeshToBin(UStaticMesh* StaticMesh, const FString&
 	
 	UExporter::RunAssetExportTask(ExportTask);
 	
-	FString BlenderExePath = TEXT("C:/Program Files (x86)/Steam/steamapps/common/Blender/blender.exe");
-	FString PythonScriptPath = FPaths::ProjectDir() / TEXT("Scripts/fbx_to_obj.py");
-	
-	FString InputFbxPath = FPaths::ProjectSavedDir() / (OutFileName + TEXT(".fbx"));
-	FString OutputObjPath = FPaths::ProjectSavedDir() / (OutFileName + TEXT(".obj"));
-	
-	FString ProcessParams = FString::Printf(TEXT("-b -P \"%s\" -- \"%s\" \"%s\""), 
-	*PythonScriptPath, *InputFbxPath, *OutputObjPath);
-	TSharedPtr<FMonitoredProcess> BlenderProcess = MakeShared<FMonitoredProcess>(BlenderExePath, ProcessParams, true, true);
-	BlenderProcess->OnOutput().BindLambda([](FString OutputMessage){
-		UE_LOG(LogTemp, Log, TEXT("[Blender Python] %s"), *OutputMessage);
-	});
-	
-	BlenderProcess->OnCompleted().BindLambda([OutputObjPath, BlenderProcess, OutFileName](int32 ReturnCode) mutable{
-		if (ReturnCode == 0) // 정상 종료 (Exit Code 0)
-		{
-			UE_LOG(LogTemp, Log, TEXT("성공적으로 OBJ가 생성되었습니다: %s"), *OutputObjPath);
-			ExecuteRecastCLI(OutputObjPath, (OutFileName + TEXT(".bin")));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("OBJ 변환에 실패했습니다. 종료 코드(Return Code): %d"), ReturnCode);
-		}
-		
-		BlenderProcess.Reset();
-	});
-	BlenderProcess->Launch();
+	ExecuteRecastCLI(OutPath, (OutFileName + TEXT(".bin")));
 }
 
 void UMapExporter::ExecuteRecastCLI(const FString& Path, const FString& OutFileName)
 {
 	FString RecastCLIPath = FPaths::ProjectDir() / TEXT("RecastCLI");
 	FString RecastCLIEXEPath = RecastCLIPath / TEXT("RecastCLI.exe");
-	FString RecastOutPath = RecastCLIPath / TEXT("Out") / OutFileName;
+	FString RecastOutPath = RecastCLIPath / TEXT("Fields") / TEXT("Navmesh") / OutFileName;
+	
 	FString ProcessParams = FString::Printf(TEXT("\"%s\" \"%s\""), *Path, *RecastOutPath);
 	TSharedPtr<FMonitoredProcess> RecastProcess = MakeShared<FMonitoredProcess>(RecastCLIEXEPath, ProcessParams, true, true);
 	RecastProcess->OnOutput().BindLambda([](const FString& OutputMessage)

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "FadeWidget.generated.h"
+#include "MP2FadeWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MP2_API UFadeWidget : public UUserWidget
+class MP2_API UMP2FadeWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
@@ -22,6 +22,7 @@ protected:
 	virtual void NativeOnInitialized() override;
 	
 private:
+	UFUNCTION()
 	void OnFadeOutCompletedCallback();
 	
 public:

@@ -18,7 +18,7 @@ DECLARE_DELEGATE_OneParam(FOnDisconnect, const FString&)
 class GAMENET_API FGNSession : public FRunnable, public TSharedFromThis<FGNSession>
 {
 public:
-	FGNSession(const FString& IP, int32 Port);
+	FGNSession(const FString& IP, int32 Port, UGameInstance* GameInstance);
 	virtual ~FGNSession() override;
 
 	void SetConnectHandler(const FOnConnect& InDelegate)
@@ -31,12 +31,11 @@ public:
 		OnDisconnect = InDelegate;
 	}
 
-public:
+	
 	virtual uint32 Run() override;
 	virtual void Stop() override;
 	virtual void Exit() override;
-
-public:
+	
 	bool TryConnect();
 	void Disconnect();
 	void RegisterSend(TSharedPtr<FSendBuffer> SendBuffer);
@@ -44,16 +43,15 @@ public:
 	bool IsRunning() const { return bIsRunning; }
 
 	FOnRecvPacket OnRecvPacket;
+	
+	UGameInstance* GetGameInstance() const { return OwnerGameInstance; }
+	
 private:
 	int32 RecvPacket();
 	int32 HandlePacket();
 
 	int32 SendPacket();
-
-public:
-	TWeakObjectPtr<UGameInstance> OwnerGameInstance;
 	
-private:
 	FOnConnect OnConnectResult;
 	FOnDisconnect OnDisconnect;
 
@@ -68,4 +66,6 @@ private:
 	TArray<BYTE> SendBufferChunk;
 
 	TSharedPtr<class FRecvBuffer> RecvBuffer;
+	UGameInstance* OwnerGameInstance;
+	
 };

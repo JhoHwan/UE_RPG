@@ -1,11 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "FadeWidget.h"
+#include "MP2FadeWidget.h"
 
 #include "Animation/WidgetAnimation.h"
 
-void UFadeWidget::PlayFadeOut()
+void UMP2FadeWidget::PlayFadeOut()
 {
 	if (FadeAnim)
 	{
@@ -14,7 +14,7 @@ void UFadeWidget::PlayFadeOut()
 	
 }
 
-void UFadeWidget::PlayFadeIn()
+void UMP2FadeWidget::PlayFadeIn()
 {
 	if (FadeAnim)
 	{
@@ -22,19 +22,19 @@ void UFadeWidget::PlayFadeIn()
 	}
 }
 
-void UFadeWidget::NativeOnInitialized()
+void UMP2FadeWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	
 	if (FadeAnim)
 	{
 		FWidgetAnimationDynamicEvent AnimEvent;
-		AnimEvent.BindDynamic(this, &UFadeWidget::OnFadeOutCompletedCallback);
+		AnimEvent.BindDynamic(this, &UMP2FadeWidget::OnFadeOutCompletedCallback);
 		BindToAnimationFinished(FadeAnim, AnimEvent);
 	}
 }
 
-void UFadeWidget::OnFadeOutCompletedCallback()
+void UMP2FadeWidget::OnFadeOutCompletedCallback()
 {
 	if (OnFadeOutCompleted.IsBound())
 	{

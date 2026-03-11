@@ -8,6 +8,7 @@ public class MP2Target : TargetRules
 	public MP2Target(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
+		ExtraModuleNames.AddRange( new string[] { "MP2Editor" } );
 		ExtraModuleNames.AddRange( new string[] { "GameNet" } );
 		ExtraModuleNames.AddRange( new string[] { } );
 		DefaultBuildSettings = BuildSettingsVersion.V4;

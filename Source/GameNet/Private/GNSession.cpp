@@ -6,9 +6,9 @@
 #include "GNLogMagro.h"
 #include "RecvBuffer.h"
 
-FGNSession::FGNSession(const FString& IP, int32 Port) 
+FGNSession::FGNSession(const FString& IP, int32 Port, UGameInstance* GameInstance) 
 	: IP(IP), Port(Port), 
-	RecvBuffer(MakeShared<FRecvBuffer>(0x1000))
+	RecvBuffer(MakeShared<FRecvBuffer>(0x1000)), OwnerGameInstance(GameInstance)
 {
 	SendBufferChunk.Reserve(MaxSendSize); 
 }
@@ -77,7 +77,7 @@ void FGNSession::Stop()
 void FGNSession::Exit()
 {
 	GN_LOG("Session Exit");
-
+	OwnerGameInstance = nullptr;
 	if (Socket)
 	{
 		Socket->Close();

@@ -9,13 +9,4 @@
 void AMP2GameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UMP2NetSubsystem* GNSubSystem = GetGameInstance()->GetSubsystem<UMP2NetSubsystem>();
-	if (!GNSubSystem) return;
-	
-	Protocol::CS_FIELD_LOADING_COMPLETE pkt;
-	pkt.set_is_success(true);
-	
-	SendBufferRef SendBuffer = ClientPacketHandler::MakeSendBuffer(pkt);
-	GNSubSystem->RegisterSend(SendBuffer);
 }
