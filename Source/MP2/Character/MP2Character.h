@@ -22,9 +22,12 @@ public:
 	void MoveToLocationLocally(const FVector& Dest, float Speed);
 	void OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int64 ServerStartTime, float Speed);
 	
-	virtual bool IsLocallyControlled() const override { return true; }
+	virtual bool IsLocallyControlled() const override { return IsOwnPlayer; }
 
+public :
+	bool IsOwnPlayer = false;
 private:
+	
 	UPROPERTY()
 	TObjectPtr<class UMP2NetworkMoveComponent> NetworkMoveComp;
 };

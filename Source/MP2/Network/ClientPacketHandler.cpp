@@ -74,7 +74,14 @@ bool Handle_SC_SPAWN_PLAYER(SessionRef& session, Protocol::SC_SPAWN_PLAYER& pkt)
 }
 bool Handle_SC_DESPAWN_PLAYER(SessionRef& session, Protocol::SC_DESPAWN_PLAYER& pkt)
 {
-	return false;
+	uint64 ObjectId = pkt.player_id();
+	UMP2NetSubsystem* NetSubsystem = session->GetGameInstance()->GetSubsystem<UMP2NetSubsystem>();
+	AsyncTask(ENamedThreads::GameThread, [NetSubsystem, ObjectId]()
+	{
+		NetSubsystem->DespawnNetObject(ObjectId);
+	});
+	
+	return true;
 }
 
 bool Handle_SC_MOVE_PATH(SessionRef& session, Protocol::SC_MOVE_PATH& pkt)

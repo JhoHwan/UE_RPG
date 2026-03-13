@@ -4,7 +4,7 @@
 #include "GNSession.h"
 #include "ClientPacketHandler.h"
 #include "Character/MP2Character.h"
-#include "Core/MP2NetworkObjectSettings.h"
+#include "Core/Setting//MP2NetworkObjectSettings.h"
 #include "Components/CapsuleComponent.h"
 
 void UMP2NetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -130,7 +130,19 @@ void UMP2NetSubsystem::SpawnCharacter(const Protocol::PlayerInfo& PlayerInfo, bo
 		if (!Controller) return;
 	
 		Controller->Possess(Character);
+		Character->IsOwnPlayer = true;
 	}
+}
+
+void UMP2NetSubsystem::DespawnNetObject(const uint64& ObjectId)
+{
+	AActor** NetObjectPtr = NetworkObjectMap.Find(ObjectId);
+	if (!NetObjectPtr) return;
+	
+	AActor* NetObject = *NetObjectPtr;
+	if (!NetObject) return;
+	
+	NetObject->Destroy();
 }
 
 AActor* UMP2NetSubsystem::GetNetworkObject(uint64 ObjectId)

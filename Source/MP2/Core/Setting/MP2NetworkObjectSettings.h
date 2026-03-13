@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/MP2Character.h"
 #include "Engine/DeveloperSettings.h"
+#include "Field/MP2FieldManifestDataAsset.h"
 #include "MP2NetworkObjectSettings.generated.h"
 
 /**
@@ -18,4 +19,7 @@ class MP2_API UMP2NetworkObjectSettings : public UDeveloperSettings
 public:
 	UPROPERTY(EditAnywhere, config, Category = "Network Spawning")
 	TSubclassOf<AMP2Character> PlayerClass;
+	
+	UPROPERTY(EditAnywhere, config, Category = "Map")
+	TSoftObjectPtr<UMP2FieldManifestDataAsset> FieldManifestData;
 };

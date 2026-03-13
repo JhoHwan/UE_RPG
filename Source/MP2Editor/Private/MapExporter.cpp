@@ -45,7 +45,7 @@ bool UMapExporter::ExportMapDataJson(int32 FieldId, const FString& MapName)
 		
 		PlayerStartJsonValues.Add(MakeShared<FJsonValueObject>(PlayerStartObj));
 	}
-	RootObj->SetArrayField(TEXT("PlayerStart"), PlayerStartJsonValues);
+	RootObj->SetArrayField(TEXT("PlayerStarts"), PlayerStartJsonValues);
 	
 	TArray<AActor*> FieldPortals;
 	UGameplayStatics::GetAllActorsOfClass(World, AFieldPortal::StaticClass(), FieldPortals);
@@ -67,7 +67,7 @@ bool UMapExporter::ExportMapDataJson(int32 FieldId, const FString& MapName)
 		
 		FieldPortalJsonValues.Add(MakeShared<FJsonValueObject>(PlayerStartObj));
 	}
-	RootObj->SetArrayField(TEXT("FieldPortal"), FieldPortalJsonValues);
+	RootObj->SetArrayField(TEXT("FieldPortals"), FieldPortalJsonValues);
 	
 	FString OutputString;
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);

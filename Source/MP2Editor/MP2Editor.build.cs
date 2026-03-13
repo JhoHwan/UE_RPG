@@ -8,8 +8,7 @@ public class MP2Editor : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "UnrealEd",
-			"Blutility",                // Editor Utility Widget용
+			"Core", "CoreUObject", "Engine", 
 			"UMG",                      // UI 시스템
 		});
  
@@ -21,7 +20,8 @@ public class MP2Editor : ModuleRules
 			"Json", 
 			"JsonUtilities",
 			"ProceduralMeshComponent", 
-			"NavigationSystem", "MP2"
+			"NavigationSystem", "MP2",
+			"UnrealEd", "Blutility",
 		});
 	}
 }

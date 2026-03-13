@@ -36,6 +36,8 @@ public:
 	void OnReceiveTimeSync(const uint64 ClientTick, const uint64 ServerTick);
 	
 	void SpawnCharacter(const Protocol::PlayerInfo& PlayerInfo, bool IsOwnPlayer = false);
+	void DespawnNetObject(const uint64& ObjectId);
+	
 	AActor* GetNetworkObject(uint64 ObjectId);
 	
 protected:

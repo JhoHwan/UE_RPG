@@ -47,6 +47,12 @@ void AMP2Character::MoveToLocationLocally(const FVector& Dest, float Speed)
 
 void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int64 ServerStartTime, float Speed)
 {
+	if (!IsLocallyControlled())
+	{
+		NetworkMoveComp->SetTargetMovePath(ServerWaypoints, Speed);
+		return;
+	}
+	
 	if (!NetworkMoveComp || ServerWaypoints.Num() < 2) return;
 	
 	TArray<int64> ComputedArrivalTimes;
@@ -61,6 +67,19 @@ void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int
 		AccumulatedTime += TimeToReach;
         
 		ComputedArrivalTimes.Add(AccumulatedTime);
+	}
+
+	// 다른 플레이어 이동 로그 추가
+	if (!IsLocallyControlled())
+	{
+		float TotalDuration = (AccumulatedTime - ServerStartTime) / 1000.0f;
+		UE_LOG(LogTemp, Log, TEXT("[RemoteMove] Character: %s, Waypoints: %d, TotalTime: %.2fs"), 
+			*GetName(), ServerWaypoints.Num(), TotalDuration);
+
+		for (int32 i = 0; i < ServerWaypoints.Num(); ++i)
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("  Waypoint[%d]: %s"), i, *ServerWaypoints[i].ToString());
+		}
 	}
 	
 	UMP2NetSubsystem* NetSubsystem = GetGameInstance()->GetSubsystem<UMP2NetSubsystem>();
