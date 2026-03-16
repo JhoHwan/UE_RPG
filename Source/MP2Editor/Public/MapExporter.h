@@ -6,6 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MapExporter.generated.h"
 
+class UMP2FieldManifestDataAsset;
+
 /**
  * 
  */
@@ -16,14 +18,15 @@ class MP2EDITOR_API UMapExporter : public UBlueprintFunctionLibrary
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "MapExport")
-	static bool ExportMapDataJson(int32 FieldId, const FString& MapName);
-
+	static bool ExportAllMaps();
 	
-	UFUNCTION(BlueprintCallable, Category = "MapExport")
-	static bool ExportNavMeshBin(const FString& MapName);
+	static bool ExportMapDataJson(int32 MapId, const FString& MapName, UWorld* World, const TMap<FGuid, TPair<int32, int32>>& PortalGuidToInfoMap);
+	static bool ExportNavMeshBin(const FString& MapName, UWorld* World);
+	static bool ExportNavMeshBinV2(const FString& MapName, UWorld* World);
 	
 private:
-	static UStaticMesh* NavMeshToStaticMesh();
+	static UStaticMesh* NavMeshToStaticMesh(UWorld* World);
+	static UStaticMesh* NavMeshToStaticMeshV2(UWorld* World);
 	static void ExportStaticMeshToBin(UStaticMesh* StaticMesh, const FString& OutFileName);
 	static void ExecuteRecastCLI(const FString& Path, const FString& OutFileName);
 };

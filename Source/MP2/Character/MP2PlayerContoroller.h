@@ -19,4 +19,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void RequestMove(const FVector& Dest);
+
+private:
+	double LastRequestTime = 0.0;
+	FVector LastRequestDest = FVector::ZeroVector;
 };

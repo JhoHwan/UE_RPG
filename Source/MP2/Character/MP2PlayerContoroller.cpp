@@ -15,19 +15,30 @@ AMP2PlayerContoroller::AMP2PlayerContoroller()
 
 void AMP2PlayerContoroller::RequestMove(const FVector& Dest)
 {
+	AMP2Character* MP2Character = Cast<AMP2Character>(GetPawn());
+	if (!MP2Character) return;
+
+	// 서버와 동일한 이동 요청 제한 로직 (0.5초, 300.0)
+	constexpr double MOVE_REQUEST_MIN_INTERVAL = 0.5;
+	constexpr double MOVE_REQUEST_MIN_DIST = 300.0;
+
+	double Now = FApp::GetCurrentTime();
+	if (MP2Character->IsMoving() && (Now - LastRequestTime < MOVE_REQUEST_MIN_INTERVAL))
+	{
+		if (FVector::DistXY(Dest, MP2Character->GetMoveDestination()) <= MOVE_REQUEST_MIN_DIST)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Move request ignored: Too frequent and same destination."));
+			return;
+		}
+	}
+
 	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
 	if (!NavSys) return;
 	FNavLocation ProjectedLocation;
 	if (NavSys->ProjectPointToNavigation(Dest, ProjectedLocation, FVector(100, 100, 50)))
 	{
 		FVector FinalDest = ProjectedLocation.Location;
-		
-		AMP2Character* MP2Character = Cast<AMP2Character>(GetPawn());
 		float CurrentSpeed = 500.0f;
-		if (MP2Character)
-		{
-			//CurrentSpeed = MP2Character->GetCharacterMovement()->MaxWalkSpeed;
-		}
 
 		Protocol::CS_REQUEST_MOVE pkt;
 	
@@ -36,15 +47,13 @@ void AMP2PlayerContoroller::RequestMove(const FVector& Dest)
 		DestPos->set_y(static_cast<float>(FinalDest.Y));
 		DestPos->set_z(static_cast<float>(FinalDest.Z));
 		
-		//pkt.set_speed(CurrentSpeed);
-	
 		SendBufferRef SendBuffer = ClientPacketHandler::MakeSendBuffer(pkt);
 		GetGameInstance()->GetSubsystem<UMP2NetSubsystem>()->RegisterSend(SendBuffer);
 
-		if (MP2Character)
-		{
-			MP2Character->MoveToLocationLocally(FinalDest, CurrentSpeed);
-		}
+		LastRequestTime = Now;
+		LastRequestDest = FinalDest;
+
+		MP2Character->MoveToLocationLocally(FinalDest);
 	}
 }
 

@@ -18,10 +18,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	
-	void SetTargetMovePath(TArray<FVector> InWaypoints, float Speed);
-	
+	void SetTargetMovePath(TArray<FVector> InWaypoints, TArray<uint32> InTimeOffsets);
+	FVector GetMoveDestination() const {return MoveWaypoints.Last();}
+
 private:
 	bool bIsMoving;
+
+public:
+	[[nodiscard]] bool IsMoving() const { return bIsMoving; }
+
+private:
 	TArray<FVector> MoveWaypoints;
 	TArray<float> MoveArrivalTimes;
 	float MoveStartTime;

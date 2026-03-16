@@ -5,11 +5,13 @@
 
 #include "MP2UISubSystem.h"
 #include "Character/MP2Character.h"
+#include "Field/MP2FieldManifestDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Network/ClientPacketHandler.h"
 #include "Network/MP2NetSubsystem.h"
 #include "Network/Protocol.pb.h"
 #include "Network/Struct.pb.h"
+#include "Setting/MP2NetworkObjectSettings.h"
 
 void UMP2GameInstance::Init()
 {
@@ -25,10 +27,27 @@ void UMP2GameInstance::Shutdown()
 	Super::Shutdown();
 }
 
-void UMP2GameInstance::LoadLevelWithFade(FName NextLevelName)
+void UMP2GameInstance::LoadLevelWithFade(int32 MapId)
 {
-	LevelName = NextLevelName;
+	const UMP2NetworkObjectSettings* Settings = GetDefault<UMP2NetworkObjectSettings>();
+	if (Settings->FieldManifestData.IsNull()) return;
+	
+	UMP2FieldManifestDataAsset* Manifest = Settings->FieldManifestData.LoadSynchronous();
+	if (!Manifest)
+	{
+		UE_LOG(LogTemp, Error, TEXT("FieldManifestData is not set in NetworkObjectSettings."));
+		return;
+	}
 
+	UMP2FieldDataAsset** FieldDataPtr = Manifest->FieldDats.Find(MapId);
+	if (!FieldDataPtr || !(*FieldDataPtr) || (*FieldDataPtr)->MapAsset.IsNull())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid FieldId: %d"), MapId);
+		return;
+	}
+	
+	TargetMapAsset = (*FieldDataPtr)->MapAsset;
+	
 	UMP2UISubSystem* UISubSystem = GetSubsystem<UMP2UISubSystem>();
 	if (UISubSystem)
 	{
@@ -44,9 +63,9 @@ void UMP2GameInstance::LoadLevelWithFade(FName NextLevelName)
 
 void UMP2GameInstance::ExecuteLevelLoad()
 {
-	if (LevelName != NAME_None)
+	if (!TargetMapAsset.IsNull())
 	{
-		UGameplayStatics::OpenLevel(this, LevelName);
+		UGameplayStatics::OpenLevelBySoftObjectPtr(this, TargetMapAsset);
 	}
 }
 

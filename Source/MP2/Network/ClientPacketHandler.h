@@ -18,16 +18,17 @@ enum : uint16
 	PKT_CS_REQ_ENTER_GAME = 1000,
 	PKT_SC_ENTER_GAME_RESULT = 1001,
 	PKT_CS_REQ_MOVE_FIELD = 1002,
-	PKT_SC_MOVE_FIELD_FAIL = 1003,
-	PKT_SC_START_FIELD_LOADING = 1004,
-	PKT_CS_FIELD_LOADING_COMPLETE = 1005,
-	PKT_SC_ENTER_FIELD = 1006,
-	PKT_SC_SPAWN_PLAYER = 1007,
-	PKT_SC_DESPAWN_PLAYER = 1008,
-	PKT_CS_REQUEST_MOVE = 1009,
-	PKT_SC_MOVE_PATH = 1010,
-	PKT_CS_TIME_SYNC = 1011,
-	PKT_SC_TIME_SYNC = 1012,
+	PKT_CS_USE_PORTAL = 1003,
+	PKT_SC_MOVE_FIELD_FAIL = 1004,
+	PKT_SC_START_FIELD_LOADING = 1005,
+	PKT_CS_FIELD_LOADING_COMPLETE = 1006,
+	PKT_SC_ENTER_FIELD = 1007,
+	PKT_SC_SPAWN_PLAYER = 1008,
+	PKT_SC_DESPAWN_PLAYER = 1009,
+	PKT_CS_REQUEST_MOVE = 1010,
+	PKT_SC_MOVE_PATH = 1011,
+	PKT_CS_TIME_SYNC = 1012,
+	PKT_SC_TIME_SYNC = 1013,
 };
 
 // Custom Handlers
@@ -65,6 +66,7 @@ public:
 	}
 	static SendBufferRef MakeSendBuffer(Protocol::CS_REQ_ENTER_GAME& pkt) { return MakeSendBuffer(pkt, PKT_CS_REQ_ENTER_GAME); }
 	static SendBufferRef MakeSendBuffer(Protocol::CS_REQ_MOVE_FIELD& pkt) { return MakeSendBuffer(pkt, PKT_CS_REQ_MOVE_FIELD); }
+	static SendBufferRef MakeSendBuffer(Protocol::CS_USE_PORTAL& pkt) { return MakeSendBuffer(pkt, PKT_CS_USE_PORTAL); }
 	static SendBufferRef MakeSendBuffer(Protocol::CS_FIELD_LOADING_COMPLETE& pkt) { return MakeSendBuffer(pkt, PKT_CS_FIELD_LOADING_COMPLETE); }
 	static SendBufferRef MakeSendBuffer(Protocol::CS_REQUEST_MOVE& pkt) { return MakeSendBuffer(pkt, PKT_CS_REQUEST_MOVE); }
 	static SendBufferRef MakeSendBuffer(Protocol::CS_TIME_SYNC& pkt) { return MakeSendBuffer(pkt, PKT_CS_TIME_SYNC); }

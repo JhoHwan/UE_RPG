@@ -24,7 +24,7 @@ class MP2_API UMP2GameInstance : public UGameInstance
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Level Trasition")
-	void LoadLevelWithFade(FName NextLevelName);
+	void LoadLevelWithFade(int32 MapId);
 
 protected:
 	virtual void Init() override;
@@ -44,4 +44,5 @@ private:
 	TSubclassOf<AMP2Character> OwnPlayerClass;
 	
 	FName LevelName;
+	TSoftObjectPtr<UWorld> TargetMapAsset;
 };

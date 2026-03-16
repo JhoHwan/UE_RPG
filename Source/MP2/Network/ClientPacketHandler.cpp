@@ -5,7 +5,7 @@
 #include "Character/MP2Character.h"
 #include "Core/MP2GameInstance.h"
 #include "Core/MP2UISubSystem.h"
-#include "google/protobuf/stubs/time.h"
+
 PacketHandlerFunc GPacketHandler[UINT16_MAX];
 
 bool Handle_INVALID(SessionRef& session, BYTE* buffer, int32 len)
@@ -31,13 +31,13 @@ bool Handle_SC_START_FIELD_LOADING(SessionRef& session, Protocol::SC_START_FIELD
 {
 	session->GetGameInstance()->GetSubsystem<UMP2NetSubsystem>()->RequestTimeSync();
 	UMP2GameInstance* GameInstance = Cast<UMP2GameInstance>(session->GetGameInstance());
+	int32 Id = static_cast<int32>(pkt.target_map_id());
 
-	AsyncTask(ENamedThreads::GameThread, [GameInstance]()
+	AsyncTask(ENamedThreads::GameThread, [GameInstance, Id]()
 	{
 		if (GameInstance)
 		{
-			// TODO : 레벨 로드 하드코딩 됨 
-			GameInstance->LoadLevelWithFade("Test_Map_0");
+			GameInstance->LoadLevelWithFade(Id);
 		}
 	});
 	return true;
@@ -89,36 +89,37 @@ bool Handle_SC_MOVE_PATH(SessionRef& session, Protocol::SC_MOVE_PATH& pkt)
 	if (pkt.waypoints_size() < 2) return false;
 
 	TArray<FVector> Waypoints;
+	TArray<uint32> ArrivalTimesOffset;
+	uint64 startTime = pkt.start_server_tick();
 	Waypoints.Reserve(pkt.waypoints_size());
+	ArrivalTimesOffset.Reserve(pkt.waypoints_size());
 	
 	for (int i = 0; i < pkt.waypoints_size(); i++)
 	{
-		const Protocol::Vector3& Point = pkt.waypoints(i);
-		Waypoints.Add({Point.x(), Point.y(), Point.z()});
+		Waypoints.Emplace(pkt.waypoints(i).pos().x(), pkt.waypoints(i).pos().y(), pkt.waypoints(i).pos().z());
+		ArrivalTimesOffset.Add(pkt.waypoints(i).arrival_offset_ms());
 	}
 
 	const uint64 ID = pkt.object_id();
-	//const float Speed = pkt.speed();
 	UMP2NetSubsystem* NetSubSystem = session->GetGameInstance()->GetSubsystem<UMP2NetSubsystem>();
-	
-	//TODO : 캐릭터 속도 정보 하드 코딩 됨
-	AsyncTask(ENamedThreads::GameThread, 
-		[NetSubSystem, ServerTime = pkt.start_server_tick() ,Waypoints = MoveTemp(Waypoints), ID, Speed = 500]() mutable  
+
+	AsyncTask(ENamedThreads::GameThread,
+		[NetSubSystem, Waypoints = MoveTemp(Waypoints), ArrivalTimes = MoveTemp(ArrivalTimesOffset), startTime, ID]()
 	{
 		if (GEngine && GEngine->GetWorldContexts().Num() > 0)
 		{
-			auto* NetObject = NetSubSystem->GetNetworkObject(ID);
+			AActor* NetObject = NetSubSystem->GetNetworkObject(ID);
 			if (!NetObject) return;
+
 			if (AMP2Character* Character = Cast<AMP2Character>(NetObject))
 			{
-				Character->OnReceiveServerMovePath(MoveTemp(Waypoints), ServerTime, Speed);
+				Character->OnReceiveServerMovePath(Waypoints, ArrivalTimes, startTime);
 			}
 		}
 	});
-		
-	return false;
-}
 
+	return true;
+}
 bool Handle_SC_TIME_SYNC(SessionRef& session, Protocol::SC_TIME_SYNC& pkt)
 {
 	uint64 ClientTick = pkt.client_tick();

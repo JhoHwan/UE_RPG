@@ -7,28 +7,18 @@
 #include "GameFramework/Actor.h"
 #include "FieldPortal.generated.h"
 
-USTRUCT(BlueprintType)
-struct FFieldPortalData
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal Data")
-	FGuid MyGuid;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Data")
-	FGuid TargetGuid;
-};
-
 UCLASS()
 class MP2_API AFieldPortal : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	AFieldPortal();
 
 protected:
+	UFUNCTION()
+	void OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -40,9 +30,9 @@ private:
 		Super::PostActorCreated();
         
 		// 유효하지 않은 Guid라면 새로 발급
-		if (!FieldPortal.MyGuid.IsValid())
+		if (!MyGuid.IsValid())
 		{
-			FieldPortal.MyGuid = FGuid::NewGuid();
+			MyGuid = FGuid::NewGuid();
 		}
 	}
     
@@ -52,12 +42,22 @@ private:
 		Super::PostDuplicate(bDuplicateForPIE);
 		if (!bDuplicateForPIE)
 		{
-			FieldPortal.MyGuid = FGuid::NewGuid();
+			MyGuid = FGuid::NewGuid();
 		}
 	}
 #endif
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Portal Data")
-	FFieldPortalData FieldPortal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal Data")
+	int32 PortalId = -1;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal Data")
+	FGuid MyGuid;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Data")
+	FGuid TargetGuid;
+	
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TObjectPtr<class UBoxComponent> Collision;
 };

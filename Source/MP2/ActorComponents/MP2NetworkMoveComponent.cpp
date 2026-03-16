@@ -11,11 +11,7 @@
 // Sets default values for this component's properties
 UMP2NetworkMoveComponent::UMP2NetworkMoveComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 // Called every frame
@@ -25,7 +21,6 @@ void UMP2NetworkMoveComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	
 	TObjectPtr<ACharacter> Owner = Cast<ACharacter>(GetOwner());
 	
-	// 1. 방어적 프로그래밍: 이동 중이 아니거나 데이터가 꼬였으면 즉시 리턴
     if (!bIsMoving || MoveWaypoints.Num() < 2 || MoveArrivalTimes.Num() < 2)
     {
         return;
@@ -129,39 +124,30 @@ void UMP2NetworkMoveComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
     }
 }
 
-void UMP2NetworkMoveComponent::SetTargetMovePath(TArray<FVector> InWaypoints, float Speed)
+void UMP2NetworkMoveComponent::SetTargetMovePath(TArray<FVector> InWaypoints, TArray<uint32> InTimeOffsets)
 {
-	// 점이 2개 미만(출발점조차 없거나 제자리)이면 이동 취소
-	if (InWaypoints.Num() < 2) 
+	// 1. 방어적 검사 (크기가 다르면 비정상 패킷)
+	if (InWaypoints.Num() < 2 || InWaypoints.Num() != InTimeOffsets.Num()) 
 	{
 		bIsMoving = false;
 		return;
 	}
-	
+    
+	// 2. 경로 데이터 저장
 	MoveWaypoints = MoveTemp(InWaypoints);
-
+    
 	MoveArrivalTimes.Empty();
 	MoveArrivalTimes.Reserve(MoveWaypoints.Num());
-	
-	float CurrentTime = GetWorld()->GetTimeSeconds();
     
-	MoveStartTime = CurrentTime;
-	MoveArrivalTimes.Add(CurrentTime);
-
-	float AccumulatedTime = CurrentTime;
-
-	// 3. 서버랑 똑같이 선형 탐색하면서 구간별 도착 시간 계산
-	for (int32 i = 1; i < MoveWaypoints.Num(); ++i)
-	{
-		// 언리얼 FVector의 Distance 함수로 두 점 사이의 유클리디안 거리 계산
-		float Dist = FVector::Distance(MoveWaypoints[i - 1], MoveWaypoints[i]);
-		
-		float Seconds = Dist / Speed;
-        
-		AccumulatedTime += Seconds;
-		MoveArrivalTimes.Add(AccumulatedTime);
-	}
+	// 3. 내 로컬 월드의 출발 시간 세팅
+	MoveStartTime = GetWorld()->GetTimeSeconds();
 	
+	for (int32 i = 0; i < InTimeOffsets.Num(); ++i)
+	{
+		float OffsetSec = static_cast<float>(InTimeOffsets[i]) / 1000.0f;
+		MoveArrivalTimes.Add(MoveStartTime + OffsetSec);
+	}
+    
 	bIsMoving = true;
 }
 

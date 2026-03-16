@@ -29,57 +29,64 @@ void AMP2Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AMP2Character::MoveToLocationLocally(const FVector& Dest, float Speed)
+void AMP2Character::MoveToLocationLocally(const FVector& Dest)
 {
 	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
 	if (!NavSys) return;
-	
-	UNavigationPath* NavPath = NavSys->FindPathToLocationSynchronously(GetWorld(), GetActorLocation(), Dest);
     
-	if (NavPath && NavPath->PathPoints.Num() > 0)
+	UNavigationPath* NavPath = NavSys->FindPathToLocationSynchronously(GetWorld(), GetActorLocation(), Dest);
+	
+	if (NavPath && NavPath->PathPoints.Num() > 1)
 	{
+		float Speed = 500.0f; // 캐릭터 이동 속도 (필요에 따라 변수화)
+       
+		TArray<uint32> TimeOffsets;
+		TimeOffsets.Reserve(NavPath->PathPoints.Num());
+		
+		TimeOffsets.Add(0);
+		
+		for (int32 i = 1; i < NavPath->PathPoints.Num(); ++i)
+		{
+			float Dist = FVector::Distance(NavPath->PathPoints[i - 1], NavPath->PathPoints[i]);
+			
+			float TimeSeconds = Dist / Speed;
+			
+			uint32 TimeMs = FMath::RoundToInt(TimeSeconds * 1000.0f);
+           
+			TimeOffsets.Add(TimeMs);
+		}
+		
 		if (NetworkMoveComp)
 		{
-			NetworkMoveComp->SetTargetMovePath(NavPath->PathPoints, Speed);
+			NetworkMoveComp->SetTargetMovePath(NavPath->PathPoints, TimeOffsets);
 		}
 	}
 }
 
-void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int64 ServerStartTime, float Speed)
+void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, TArray<uint32> MoveTimeOffset, int64 ServerStartTime)
 {
-	if (!IsLocallyControlled())
-	{
-		NetworkMoveComp->SetTargetMovePath(ServerWaypoints, Speed);
-		return;
-	}
-	
 	if (!NetworkMoveComp || ServerWaypoints.Num() < 2) return;
 	
 	TArray<int64> ComputedArrivalTimes;
 	ComputedArrivalTimes.Reserve(ServerWaypoints.Num());
 	int64 AccumulatedTime = ServerStartTime;
-	for (int i = 1; i < ServerWaypoints.Num(); i++)
+	
+	for (int i = 0; i < MoveTimeOffset.Num(); i++)
 	{
-		const float Dist = FVector::Dist2D(ServerWaypoints[i - 1], ServerWaypoints[i]);
-		const float DeltaSeconds = Dist / Speed;
-		
-		int64 TimeToReach = DeltaSeconds * 1000.0f;
-		AccumulatedTime += TimeToReach;
-        
+		AccumulatedTime += MoveTimeOffset[i];
 		ComputedArrivalTimes.Add(AccumulatedTime);
 	}
-
-	// 다른 플레이어 이동 로그 추가
+	
+	if (ComputedArrivalTimes.Num() != ServerWaypoints.Num())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Path sync error: Array size mismatch!"));
+		return; 
+	}
+	
 	if (!IsLocallyControlled())
 	{
-		float TotalDuration = (AccumulatedTime - ServerStartTime) / 1000.0f;
-		UE_LOG(LogTemp, Log, TEXT("[RemoteMove] Character: %s, Waypoints: %d, TotalTime: %.2fs"), 
-			*GetName(), ServerWaypoints.Num(), TotalDuration);
-
-		for (int32 i = 0; i < ServerWaypoints.Num(); ++i)
-		{
-			UE_LOG(LogTemp, Verbose, TEXT("  Waypoint[%d]: %s"), i, *ServerWaypoints[i].ToString());
-		}
+		NetworkMoveComp->SetTargetMovePath(MoveTemp(ServerWaypoints), MoveTemp(MoveTimeOffset));
+		return;
 	}
 	
 	UMP2NetSubsystem* NetSubsystem = GetGameInstance()->GetSubsystem<UMP2NetSubsystem>();
@@ -97,15 +104,13 @@ void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int
 	}
 	else
 	{
-		// 타임라인 탐색
 		for (int32 i = 1; i < ComputedArrivalTimes.Num(); ++i)
 		{
 			if (ServerNow <= ComputedArrivalTimes[i])
 			{
 				int64 T0 = ComputedArrivalTimes[i - 1];
 				int64 T1 = ComputedArrivalTimes[i];
-
-				// 선형 보간 비율 (0.0 ~ 1.0)
+				
 				float Alpha = static_cast<float>(ServerNow - T0) / static_cast<float>(T1 - T0);
 				Alpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
 
@@ -119,7 +124,7 @@ void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int
 	float ErrorDist = FVector::Dist2D(CurrentPos, PredictedServerPos);
 	TArray<FVector> BlendedPath;
 
-	if (ErrorDist > 200.0f)
+	if (ErrorDist > 500.0f)
 	{
 		SetActorLocation(PredictedServerPos);
 		BlendedPath.Add(PredictedServerPos);
@@ -139,6 +144,16 @@ void AMP2Character::OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, int
 	
 	if (BlendedPath.Num() > 1)
 	{
-		NetworkMoveComp->SetTargetMovePath(BlendedPath, Speed);
+		NetworkMoveComp->SetTargetMovePath(MoveTemp(BlendedPath), MoveTemp(MoveTimeOffset));
 	}
+}
+
+bool AMP2Character::IsMoving() const
+{
+	return NetworkMoveComp->IsMoving();
+}
+
+FVector AMP2Character::GetMoveDestination()
+{
+	return NetworkMoveComp->GetMoveDestination();
 }

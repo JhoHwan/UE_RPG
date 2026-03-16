@@ -17,5 +17,5 @@ class MP2_API UMP2FieldManifestDataAsset : public UPrimaryDataAsset
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Portal Data")
-	TMap<int32, UMP2FieldDataAsset*> FieldPortals;
+	TMap<int32, UMP2FieldDataAsset*> FieldDats;
 };
