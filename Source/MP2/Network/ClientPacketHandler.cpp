@@ -2,6 +2,7 @@
 
 #include "GNSession.h"
 #include "MP2NetSubsystem.h"
+#include "ActorComponents/MP2NetworkMoveComponent.h"
 #include "Character/MP2Character.h"
 #include "Core/MP2GameInstance.h"
 #include "Core/MP2UISubSystem.h"
@@ -111,13 +112,13 @@ bool Handle_SC_MOVE_PATH(SessionRef& session, Protocol::SC_MOVE_PATH& pkt)
 			AActor* NetObject = NetSubSystem->GetNetworkObject(ID);
 			if (!NetObject) return;
 
-			if (AMP2Character* Character = Cast<AMP2Character>(NetObject))
+			// 컴포넌트를 찾아 서버 시간 기반 타임라인 데이터 전달
+			if (auto* MoveComp = NetObject->FindComponentByClass<UMP2NetworkMoveComponent>())
 			{
-				Character->OnReceiveServerMovePath(Waypoints, ArrivalTimes, startTime);
+				MoveComp->HandleServerMovePath(Waypoints, ArrivalTimes, startTime);
 			}
 		}
 	});
-
 	return true;
 }
 bool Handle_SC_TIME_SYNC(SessionRef& session, Protocol::SC_TIME_SYNC& pkt)

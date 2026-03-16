@@ -14,14 +14,13 @@ class MP2_API AMP2Character : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMP2Character();
-	
+
 	virtual void BeginPlay() override;
-	
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void MoveToLocationLocally(const FVector& Dest);
-	void OnReceiveServerMovePath(TArray<FVector> ServerWaypoints, TArray<uint32> MoveTimeOffset, int64 ServerStartTime);
-	
+
 	virtual bool IsLocallyControlled() const override { return IsOwnPlayer; }
 	bool IsMoving() const;
 	FVector GetMoveDestination();
@@ -29,7 +28,7 @@ public:
 public :
 	bool IsOwnPlayer = false;
 private:
-	
-	UPROPERTY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Network", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UMP2NetworkMoveComponent> NetworkMoveComp;
 };
