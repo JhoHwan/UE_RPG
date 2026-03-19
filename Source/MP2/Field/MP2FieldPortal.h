@@ -5,19 +5,27 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
-#include "FieldPortal.generated.h"
+#include "Interface/MP2Interactable.h"
+#include "MP2FieldPortal.generated.h"
 
 UCLASS()
-class MP2_API AFieldPortal : public AActor
+class MP2_API AMP2FieldPortal : public AActor, public IMP2Interactable
 {
 	GENERATED_BODY()
 
 public:
-	AFieldPortal();
-
+	AMP2FieldPortal();
+	
+	virtual void Interact(AMP2Character* Interactor) override;
+	virtual FString GetInteractText() const override;
+	
 protected:
+	
 	UFUNCTION()
-	void OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -59,5 +67,5 @@ public:
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TObjectPtr<class UBoxComponent> Collision;
+	TObjectPtr<class USphereComponent> Collision;
 };

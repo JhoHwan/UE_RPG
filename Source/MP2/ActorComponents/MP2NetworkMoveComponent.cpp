@@ -131,13 +131,6 @@ void UMP2NetworkMoveComponent::HandleServerMovePath(TArray<FVector> InWaypoints,
 	ACharacter* Owner = Cast<ACharacter>(GetOwner());
 	if (!Owner) return;
 
-	// 본인이 아닐 경우 즉시 적용
-	if (!Owner->IsLocallyControlled())
-	{
-		SetTargetMovePath(MoveTemp(InWaypoints), MoveTemp(InTimeOffsets));
-		return;
-	}
-
 	UMP2NetSubsystem* NetSubsystem = Owner->GetGameInstance()->GetSubsystem<UMP2NetSubsystem>();
 	if (!NetSubsystem) return;
 	int64 ServerNow = NetSubsystem->GetServerTime();
@@ -172,7 +165,7 @@ void UMP2NetworkMoveComponent::HandleServerMovePath(TArray<FVector> InWaypoints,
 
 	float ErrorDist = FVector::Dist2D(CurrentPos, PredictedServerPos);
 	TArray<FVector> BlendedPath;
-
+	
 	if (ErrorDist > 500.0f)
 	{
 		Owner->SetActorLocation(PredictedServerPos);

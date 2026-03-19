@@ -50,52 +50,20 @@ bool UMP2NetSubsystem::ConnectToGameServer(const FString& IP, int32 Port)
 	return true;
 }
 
-void UMP2NetSubsystem::RequestTimeSync()
+void UMP2NetSubsystem::OnRecvPing(uint64 ServerSendTick)
 {
-	Protocol::CS_TIME_SYNC Packet;
-	Packet.set_client_tick(static_cast<uint64>(FPlatformTime::Seconds() * 1000.0));
-	
-	RegisterSend(ClientPacketHandler::MakeSendBuffer(Packet));
+	Protocol::CS_PONG PongPkt; 
+	PongPkt.set_server_send_tick(ServerSendTick);
+	PongPkt.set_client_recv_tick(GetLocalTick());
+	PongPkt.set_client_send_tick(GetLocalTick()); 
+	RegisterSend(ClientPacketHandler::MakeSendBuffer(PongPkt));
 }
 
-void UMP2NetSubsystem::OnReceiveTimeSync(const uint64 ClientTick, const uint64 ServerTick)
+void UMP2NetSubsystem::OnRecvTimeSync(int64 ServerOffset, uint32 RTT)
 {
-	// T1: 내가 아까 패킷을 보냈을 때의 내 시간
-	int64 T1 = static_cast<int64>(ClientTick);
-    
-	// T2: 서버가 패킷을 받았을 때의 서버 시간
-	int64 T2 = static_cast<int64>(ServerTick);
-    
-	// T4: 지금 응답을 받은 시점의 내 시간
-	int64 T4 = static_cast<int64>(FPlatformTime::Seconds() * 1000.0);
-    
-	// RTT 및 Latency 계산
-	int64 RTT = T4 - T1;
-	int64 Latency = RTT / 2;
-    
-	// Offset 계산
-	int64 NewOffset = T2 - (T1 + Latency);
-	int32 CurrentCount = SyncPingsReceived.load();
-	if (CurrentCount < REQUIRED_INITIAL_SYNCS)
-	{
-		AccumulatedOffset.fetch_add(NewOffset);
-		CurrentCount = SyncPingsReceived.fetch_add(1) + 1;
-		if (CurrentCount == REQUIRED_INITIAL_SYNCS)
-		{
-			int64 AverageOffset = AccumulatedOffset.load() / REQUIRED_INITIAL_SYNCS;
-			ServerClockOffset.store(AverageOffset);
-		}
-		else
-		{
-			RequestTimeSync();
-		}
-		return;
-	}
-	
-	int64 CurrentOffset = ServerClockOffset.load();
-	int64 SmoothedOffset = static_cast<int64>((CurrentOffset * 0.9f) + (NewOffset * 0.1f));
-	ServerClockOffset.store(SmoothedOffset);
-	UE_LOG(LogTemp, Log, TEXT("ClockOffset %lld"), ServerClockOffset.load())
+	ServerClockOffset.store(ServerOffset);
+	CurrentRTT.store(RTT);
+	UE_LOG(LogTemp, Log, TEXT("Sync Complete! Offset: %lld, RTT: %u"), ServerOffset, RTT);
 }
 
 void UMP2NetSubsystem::SpawnCharacter(const Protocol::PlayerInfo& PlayerInfo, bool IsOwnPlayer)
@@ -195,13 +163,7 @@ void UMP2NetSubsystem::HandleServerConnectionCompleted(bool bSuccess)
 // TickableObject 
 void UMP2NetSubsystem::Tick(float DeltaTime)
 {
-	SyncTimeAccumulator += DeltaTime;
-	
-	if (SyncTimeAccumulator > 10.0f)
-	{
-		SyncTimeAccumulator = 0;
-		RequestTimeSync();
-	}
+
 }
 
 bool UMP2NetSubsystem::IsTickable() const

@@ -27,8 +27,9 @@ enum : uint16
 	PKT_SC_DESPAWN_PLAYER = 1009,
 	PKT_CS_REQUEST_MOVE = 1010,
 	PKT_SC_MOVE_PATH = 1011,
-	PKT_CS_TIME_SYNC = 1012,
-	PKT_SC_TIME_SYNC = 1013,
+	PKT_SC_TIME_SYNC = 1012,
+	PKT_SC_PING = 1013,
+	PKT_CS_PONG = 1014,
 };
 
 // Custom Handlers
@@ -41,6 +42,7 @@ bool Handle_SC_SPAWN_PLAYER(SessionRef& session, Protocol::SC_SPAWN_PLAYER& pkt)
 bool Handle_SC_DESPAWN_PLAYER(SessionRef& session, Protocol::SC_DESPAWN_PLAYER& pkt);
 bool Handle_SC_MOVE_PATH(SessionRef& session, Protocol::SC_MOVE_PATH& pkt);
 bool Handle_SC_TIME_SYNC(SessionRef& session, Protocol::SC_TIME_SYNC& pkt);
+bool Handle_SC_PING(SessionRef& session, Protocol::SC_PING& pkt);
 
 class ClientPacketHandler
 {
@@ -57,6 +59,7 @@ public:
 		GPacketHandler[PKT_SC_DESPAWN_PLAYER] = [](SessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::SC_DESPAWN_PLAYER>(Handle_SC_DESPAWN_PLAYER, session, buffer, len); };
 		GPacketHandler[PKT_SC_MOVE_PATH] = [](SessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::SC_MOVE_PATH>(Handle_SC_MOVE_PATH, session, buffer, len); };
 		GPacketHandler[PKT_SC_TIME_SYNC] = [](SessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::SC_TIME_SYNC>(Handle_SC_TIME_SYNC, session, buffer, len); };
+		GPacketHandler[PKT_SC_PING] = [](SessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::SC_PING>(Handle_SC_PING, session, buffer, len); };
 	}
 
 	static bool HandlePacket(SessionRef& session, BYTE* buffer, int32 len)
@@ -69,7 +72,7 @@ public:
 	static SendBufferRef MakeSendBuffer(Protocol::CS_USE_PORTAL& pkt) { return MakeSendBuffer(pkt, PKT_CS_USE_PORTAL); }
 	static SendBufferRef MakeSendBuffer(Protocol::CS_FIELD_LOADING_COMPLETE& pkt) { return MakeSendBuffer(pkt, PKT_CS_FIELD_LOADING_COMPLETE); }
 	static SendBufferRef MakeSendBuffer(Protocol::CS_REQUEST_MOVE& pkt) { return MakeSendBuffer(pkt, PKT_CS_REQUEST_MOVE); }
-	static SendBufferRef MakeSendBuffer(Protocol::CS_TIME_SYNC& pkt) { return MakeSendBuffer(pkt, PKT_CS_TIME_SYNC); }
+	static SendBufferRef MakeSendBuffer(Protocol::CS_PONG& pkt) { return MakeSendBuffer(pkt, PKT_CS_PONG); }
 
 private:
 	template<typename PacketType, typename ProcessFunc>

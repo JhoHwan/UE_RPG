@@ -67,3 +67,26 @@ FVector AMP2Character::GetMoveDestination()
 {
 	return NetworkMoveComp ? NetworkMoveComp->GetMoveDestination() : FVector::ZeroVector;
 }
+
+void AMP2Character::SetCurrentInteractable(IMP2Interactable* NewInteractable)
+{
+	CurrentInteractable = NewInteractable;
+}
+
+void AMP2Character::ClearCurrentInteractable(IMP2Interactable* OldInteractable)
+{
+	if (CurrentInteractable == OldInteractable)
+	{
+		CurrentInteractable = nullptr;
+	}
+}
+
+void AMP2Character::DoInteract()
+{
+	if (CurrentInteractable)
+	{
+		CurrentInteractable->Interact(this);
+	}
+}
+
+

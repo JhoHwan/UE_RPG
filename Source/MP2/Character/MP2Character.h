@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Field/MP2FieldPortal.h"
 #include "GameFramework/Character.h"
 #include "MP2Character.generated.h"
 
@@ -24,11 +25,20 @@ public:
 	virtual bool IsLocallyControlled() const override { return IsOwnPlayer; }
 	bool IsMoving() const;
 	FVector GetMoveDestination();
+	
+	void SetCurrentInteractable(IMP2Interactable* NewInteractable);
+	void ClearCurrentInteractable(IMP2Interactable* OldInteractable);
 
+public:
+	UFUNCTION(BlueprintCallable, Category="Interaction")
+	void DoInteract();
+	
 public :
 	bool IsOwnPlayer = false;
+	
 private:
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Network", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UMP2NetworkMoveComponent> NetworkMoveComp;
+
+	IMP2Interactable* CurrentInteractable;
 };

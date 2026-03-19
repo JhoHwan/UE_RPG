@@ -30,7 +30,6 @@ bool Handle_SC_MOVE_FIELD_FAIL(SessionRef& session, Protocol::SC_MOVE_FIELD_FAIL
 }
 bool Handle_SC_START_FIELD_LOADING(SessionRef& session, Protocol::SC_START_FIELD_LOADING& pkt)
 {
-	session->GetGameInstance()->GetSubsystem<UMP2NetSubsystem>()->RequestTimeSync();
 	UMP2GameInstance* GameInstance = Cast<UMP2GameInstance>(session->GetGameInstance());
 	int32 Id = static_cast<int32>(pkt.target_map_id());
 
@@ -121,12 +120,24 @@ bool Handle_SC_MOVE_PATH(SessionRef& session, Protocol::SC_MOVE_PATH& pkt)
 	});
 	return true;
 }
+
 bool Handle_SC_TIME_SYNC(SessionRef& session, Protocol::SC_TIME_SYNC& pkt)
 {
-	uint64 ClientTick = pkt.client_tick();
-	uint64 ServerTick = pkt.server_tick();
+	int64 ServerOffset = pkt.server_offset();
+	uint32 RTT = pkt.rtt();
 
-	session->GetGameInstance()->GetSubsystem<UMP2NetSubsystem>()->OnReceiveTimeSync(ClientTick, ServerTick);
+	if (UMP2NetSubsystem* NetSubSystem = session->GetGameInstance()->GetSubsystem<UMP2NetSubsystem>())
+	{
+		NetSubSystem->OnRecvTimeSync(ServerOffset, RTT);
+	}
+	return true;
+}
 
+bool Handle_SC_PING(SessionRef& session, Protocol::SC_PING& pkt)
+{
+	if (UMP2NetSubsystem* NetSubSystem = session->GetGameInstance()->GetSubsystem<UMP2NetSubsystem>())
+	{
+		NetSubSystem->OnRecvPing(pkt.server_send_tick());
+	}
 	return true;
 }

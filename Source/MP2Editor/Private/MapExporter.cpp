@@ -14,7 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/MonitoredProcess.h"
 #include "NavMesh/RecastNavMesh.h"
-#include "Field/FieldPortal.h"
+#include "Field/MP2FieldPortal.h"
 
 #include "Field/MP2FieldManifestDataAsset.h"
 #include "Core/Setting/MP2NetworkObjectSettings.h"
@@ -47,10 +47,10 @@ bool UMapExporter::ExportAllMaps()
 		if (!World) continue;
 
 		TArray<AActor*> FieldPortals;
-		UGameplayStatics::GetAllActorsOfClass(World, AFieldPortal::StaticClass(), FieldPortals);
+		UGameplayStatics::GetAllActorsOfClass(World, AMP2FieldPortal::StaticClass(), FieldPortals);
 		for (int32 i = 0; i < FieldPortals.Num(); ++i)
 		{
-			AFieldPortal* Portal = Cast<AFieldPortal>(FieldPortals[i]);
+			AMP2FieldPortal* Portal = Cast<AMP2FieldPortal>(FieldPortals[i]);
 			if (Portal)
 			{
 				Portal->PortalId = i;
@@ -235,11 +235,11 @@ bool UMapExporter::ExportMapDataJson(int32 MapId, const FString& MapName, UWorld
 	RootObj->SetArrayField(TEXT("PlayerStarts"), PlayerStartJsonValues);
 	
 	TArray<AActor*> FieldPortals;
-	UGameplayStatics::GetAllActorsOfClass(World, AFieldPortal::StaticClass(), FieldPortals);
+	UGameplayStatics::GetAllActorsOfClass(World, AMP2FieldPortal::StaticClass(), FieldPortals);
 	TArray<TSharedPtr<FJsonValue>> FieldPortalJsonValues;
 	for (int32 i = 0; i < FieldPortals.Num(); ++i)
 	{
-		AFieldPortal* Portal = Cast<AFieldPortal>(FieldPortals[i]);
+		AMP2FieldPortal* Portal = Cast<AMP2FieldPortal>(FieldPortals[i]);
 		if (!IsValid(Portal)) continue;
 		
 		TSharedPtr<FJsonObject> PortalObj = MakeShared<FJsonObject>();

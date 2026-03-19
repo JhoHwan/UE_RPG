@@ -17,8 +17,7 @@ void AMP2PlayerContoroller::RequestMove(const FVector& Dest)
 {
 	AMP2Character* MP2Character = Cast<AMP2Character>(GetPawn());
 	if (!MP2Character) return;
-
-	// 서버와 동일한 이동 요청 제한 로직 (0.5초, 300.0)
+	
 	constexpr double MOVE_REQUEST_MIN_INTERVAL = 0.5;
 	constexpr double MOVE_REQUEST_MIN_DIST = 300.0;
 
@@ -35,21 +34,21 @@ void AMP2PlayerContoroller::RequestMove(const FVector& Dest)
 	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
 	if (!NavSys) return;
 	FNavLocation ProjectedLocation;
+	UMP2NetSubsystem* NetSubSystem = GetGameInstance()->GetSubsystem<UMP2NetSubsystem>();
 	if (NavSys->ProjectPointToNavigation(Dest, ProjectedLocation, FVector(100, 100, 50)))
 	{
 		FVector FinalDest = ProjectedLocation.Location;
 		float CurrentSpeed = 500.0f;
 
 		Protocol::CS_REQUEST_MOVE pkt;
-	
+
 		Protocol::Vector3* DestPos = pkt.mutable_pos();
 		DestPos->set_x(static_cast<float>(FinalDest.X));
 		DestPos->set_y(static_cast<float>(FinalDest.Y));
 		DestPos->set_z(static_cast<float>(FinalDest.Z));
+		pkt.set_client_tick(UMP2NetSubsystem::GetLocalTick());
 		
-		SendBufferRef SendBuffer = ClientPacketHandler::MakeSendBuffer(pkt);
-		GetGameInstance()->GetSubsystem<UMP2NetSubsystem>()->RegisterSend(SendBuffer);
-
+		SendBufferRef SendBuffer = ClientPacketHandler::MakeSendBuffer(pkt);		NetSubSystem->RegisterSend(SendBuffer);
 		LastRequestTime = Now;
 		LastRequestDest = FinalDest;
 
